@@ -1,12 +1,19 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { NavigationEnd } from '@angular/router';
+import { NavigationEnd, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SidebarComponent } from '../dashboard/sidebar/sidebar.component';
 import { SidebarSection, Tab } from '../../shared/models/sidebar-item';
 import { playerJourneySidebarLockReason } from '../../core/services/client-side/player-journey/player-journey';
 import { environment } from '../../../environments/environment';
-import { LgActivityComponent, LgIconName, LgNavRailComponent, LgNavSection, LgSlotDirective } from '@grimoire';
+import {
+  LgActivityComponent,
+  LgIconName,
+  LgNavItemComponent,
+  LgNavRailComponent,
+  LgNavRailHeaderComponent,
+  LgNavSectionComponent,
+} from '@grimoire';
 import { actionLabel, injectActionProgress } from './action-progress';
 
 /** Grimoire icon names for the sidebar's destinations: the same drawings as the sidebar's own SVGs. */
@@ -45,8 +52,27 @@ export function railParentId(url: string): string | undefined {
   return /^\/(?:game\/)?world(?:\/|$)/.test(path) ? 'world' : undefined;
 }
 
-/** The sidebar's sections in the NavRail's shape: every destination, each with its description (D-104). */
-export function toRailSections(sections: readonly SidebarSection[], state: (item: Tab) => RailItemState): LgNavSection[] {
+/** A destination as the rail draws it: an `a[lgNavItem]`'s inputs, its route and its title. */
+export interface RailItem {
+  id: string;
+  title: string;
+  description?: string;
+  icon?: LgIconName;
+  route: string;
+  locked?: boolean;
+  reason?: string;
+  badge?: number;
+  badgeLabel?: string;
+  ready?: boolean;
+}
+
+export interface RailSection {
+  label: string;
+  items: readonly RailItem[];
+}
+
+/** The sidebar's sections as the rail draws them: every destination, each with its description (D-104). */
+export function toRailSections(sections: readonly SidebarSection[], state: (item: Tab) => RailItemState): RailSection[] {
   return sections.map((section) => ({
     label: section.label,
     items: section.items.map((item) => {
@@ -80,23 +106,73 @@ export function toRailSections(sections: readonly SidebarSection[], state: (item
  */
 @Component({
   selector: 'app-rail-grimoire',
-  imports: [LgNavRailComponent, LgActivityComponent, LgSlotDirective],
+  imports: [
+    LgNavRailComponent,
+    LgNavRailHeaderComponent,
+    LgNavSectionComponent,
+    LgNavItemComponent,
+    LgActivityComponent,
+    RouterLink,
+    RouterLinkActive,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: 'display: contents' },
   template: `
-    <lg-nav-rail [sections]="railSections()" [activeId]="activeId()" [compact]="compact()" (navigate)="onRailNavigate($event)">
+    <lg-nav-rail [compact]="compact()">
       @if (hasAction()) {
-        <button
-          lgActivity
-          lgSlot="header"
-          [label]="activityLabel()"
-          [remaining]="progress.remaining()"
-          [progress]="progress.progress()"
-          [compact]="compact()"
-          [short]="currentActionLabel()"
-          [openLabel]="compact() ? '' : 'Go to action'"
-          (click)="navigateToAction(); toggleSidebar()"
-        ></button>
+        <lg-nav-rail-header>
+          <button
+            lgActivity
+            [label]="activityLabel()"
+            [remaining]="progress.remaining()"
+            [progress]="progress.progress()"
+            [compact]="compact()"
+            [short]="currentActionLabel()"
+            [openLabel]="compact() ? '' : 'Go to action'"
+            (click)="navigateToAction(); toggleSidebar()"
+          ></button>
+        </lg-nav-rail-header>
+      }
+      @for (section of railSections(); track section.label) {
+        <lg-nav-section [label]="section.label">
+          @for (item of section.items; track item.id) {
+            <!-- A locked destination has no link: it stays in reach and gives its condition (D-106). -->
+            @if (item.id === 'world') {
+              <!-- The World Map is current on every screen inside the world but the Tower's (railParentId, D-115):
+                   a rule routerLinkActive can't express, so it is reckoned here. -->
+              <a
+                lgNavItem
+                [routerLink]="item.locked ? null : item.route"
+                [attr.aria-current]="worldCurrent() ? 'page' : null"
+                [icon]="item.icon"
+                [description]="item.description"
+                [badge]="item.badge"
+                [badgeLabel]="item.badgeLabel"
+                [ready]="item.ready"
+                [locked]="!!item.locked"
+                [reason]="item.reason"
+                (click)="onRailNavigate(item.id)"
+                >{{ item.title }}</a
+              >
+            } @else {
+              <a
+                lgNavItem
+                [routerLink]="item.locked ? null : item.route"
+                routerLinkActive
+                ariaCurrentWhenActive="page"
+                [icon]="item.icon"
+                [description]="item.description"
+                [badge]="item.badge"
+                [badgeLabel]="item.badgeLabel"
+                [ready]="item.ready"
+                [locked]="!!item.locked"
+                [reason]="item.reason"
+                (click)="onRailNavigate(item.id)"
+                >{{ item.title }}</a
+              >
+            }
+          }
+        </lg-nav-section>
       }
     </lg-nav-rail>
   `,
@@ -119,13 +195,10 @@ export class RailGrimoireComponent extends SidebarComponent {
     }));
   });
 
-  protected readonly activeId = computed(() => {
-    const url = this.url();
-    for (const section of this.sections()) {
-      for (const item of section.items) if (this.isItemActive(item.route)) return item.id;
-    }
-    return railParentId(url);
-  });
+  /** The World Map is the current place on any screen inside the world but the World Tower's (D-115). */
+  protected readonly worldCurrent = computed(
+    () => railParentId(this.url()) === 'world' && !this.isItemActive(['world', 'tower']),
+  );
 
   // The parent's own constructor takes the sidebar's services; this only follows the URL as a signal.
   private readonly followUrl = this.router.events

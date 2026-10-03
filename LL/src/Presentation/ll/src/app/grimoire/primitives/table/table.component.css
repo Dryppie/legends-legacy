@@ -1,0 +1,34 @@
+/* ---------- Table (D-146) ----------
+   Global: the cells are the screen's own markup. A data table in body-compact (the density's row text), each body row
+   at least the density's row height with its cell paddings (Foundations · Space & Density). Column heads are labels:
+   Barlow 600 capitals in ink-muted, with a hairline under the head that travels with a sticky header. Rows are parted
+   by a line hairline, or striped with row-stripe on lg-table--zebra, never both (Foundations · Lines, D-060). The table
+   has no edge or fill of its own: it sits on its region's surface; in a flush Panel its outer cells take the Panel's
+   inset. A column of numbers (lg-table__num) is numeral-compact, tabular Barlow Condensed 600, at the end of its cells
+   (Foundations · Typography, Numerals); name its unit once, in the head. */
+.lg-table {
+  width: 100%; border-collapse: collapse; border-spacing: 0;
+  font-family: var(--lg-font-ui); font-size: var(--lg-row-text); line-height: var(--lg-row-leading); color: var(--lg-ink);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.lg-table > caption {
+  caption-side: top; padding: 0 0 var(--lg-space-2); text-align: start;
+  font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ink-muted);
+}
+.lg-table :is(th, td) { padding: var(--lg-cell-y) var(--lg-cell-x); text-align: start; vertical-align: middle; }
+/* In a flush Panel the outer cells pad to the Panel's inset (--lg-list-pad), so the first column lines up with its title. */
+.lg-table :is(th, td):first-child { padding-inline-start: var(--lg-list-pad, var(--lg-cell-x)); }
+.lg-table :is(th, td):last-child { padding-inline-end: var(--lg-list-pad, var(--lg-cell-x)); }
+.lg-table > tbody > tr > :is(th, td) { height: var(--lg-row); }
+.lg-table > thead th {
+  font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase;
+  color: var(--lg-ink-muted); white-space: nowrap;
+  box-shadow: inset 0 calc(-1 * var(--lg-border-hairline)) 0 var(--lg-line);
+}
+/* A row's own head (the item, the player) reads first: weight 600. */
+.lg-table > tbody th { font-weight: 600; }
+.lg-table > tbody > tr + tr > * { border-top: var(--lg-border-hairline) solid var(--lg-line); }
+.lg-table--zebra > tbody > tr + tr > * { border-top: 0; }
+.lg-table--zebra > tbody > tr:nth-child(even) > * { background: var(--lg-row-stripe); }
+.lg-table .lg-table__num { text-align: end; white-space: nowrap; }
+.lg-table > tbody .lg-table__num { font-family: var(--lg-font-numeral); font-weight: 600; font-size: var(--lg-text-numeral-compact); line-height: var(--lg-leading-numeral-compact); }

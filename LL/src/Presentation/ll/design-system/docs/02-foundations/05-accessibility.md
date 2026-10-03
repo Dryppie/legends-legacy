@@ -53,7 +53,7 @@ Every player can read, reach and understand everything in Legend's Legacy, at th
 | Reading size | Default · Large · Extra large | `data-reading-font-size="large"` or `"extra-large"` sets the root to 115% or 130%, and everything in rem follows (Text scaling, below). |
 | Reduced motion | The operating system's setting | Under `prefers-reduced-motion: reduce`, every transition and animation in the system ends at once and scrolling is instant, matching the game's own rule. `data-motion="reduced"` on the root does the same, for an in-game setting. Each motion category's alternative — usually an instant change, with the live mark's brief colour change — is in Foundations · Motion. |
 | Focus rings | Always on | `focus-ring` on every interactive element, never removed. In forced colours, a system outline. |
-| Focus-trapped dialogs | Always on | The game's dialogs (its `appDialogFocus` directive) set `role="dialog"` and `aria-modal`, trap focus, focus the first control, close on Escape and return focus to the opener. Grimoire's future Dialog keeps all of it. The GameShell rail drawer follows the same model: it takes focus, makes the rest inert, closes on Escape and returns focus. |
+| Focus-trapped dialogs | Always on | The game's dialogs (its `appDialogFocus` directive) set `role="dialog"` and `aria-modal`, trap focus, focus the first control, close on Escape and return focus to the opener. Grimoire's Dialog (`LgDialog`, on the CDK's `Dialog`, D-145) keeps all of it. The GameShell rail drawer follows the same model: it takes focus, makes the rest inert, closes on Escape and returns focus. |
 
 ## Text scaling
 
@@ -132,7 +132,7 @@ Never use a positive `tabindex`. Hidden and off-screen things are out of the ord
 6. a hover card, tooltip, suggestion list or menu on the page (a Ledger explanation, SearchField);
 7. the rail drawer, with focus back to the menu button.
 
-The CDK overlay keeps this order for everything on it, the latest opened first, and the tip hears Escape before anything (D-134). The rail drawer and the Objective's tracker, which aren't overlays, leave an Escape something above them already took alone.
+The CDK overlay keeps this order for everything on it, the latest opened first, and the tip hears Escape before anything (D-134). The rail drawer, which isn't an overlay, leaves an Escape something above it already took alone; the Objective's tracker is a Popover on the overlay (D-146).
 
 Only when no layer is open may a screen use Escape for Back, and its KeyHints then say so.
 

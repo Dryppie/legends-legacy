@@ -6,7 +6,18 @@ The screen frame.
 
 The full-screen frame every in-game screen sits in: NavRail on the left, the stage in the middle, the Folio and the Chronicle (chat) on the right.
 
-**Provide:** a `rail` slot (a NavRail), a `top` slot (a TopBar — with `showMenu`, its menu button opens the rail drawer on phones), the stage as content (a Stage), and optionally the `folio`, `hints` and `chronicle` (a Chronicle) slots. Pass the player's chat-layout setting straight through as `chatLayout`: `docked` or `floating` — the same values as the game's `ChatLayout` preference. For the floating drawer you can control and persist its position with `[(chroniclePosition)]` (`{ left, bottom }` in px from the shell's bottom-left).
+**Provide:** its regions, each a component that places itself (D-141): `lg-shell-rail` (a NavRail), `lg-shell-top` (a TopBar — with `showMenu`, its menu button opens the rail drawer on phones), the stage as content (a Stage or a Page), and optionally `lg-shell-folio` (a Folio), `lg-shell-hints` (KeyHints) and `lg-shell-chronicle` (a Chronicle). A region may hold a component of your own that draws the part (the game's `app-rail-grimoire`). Pass the player's chat-layout setting straight through as `chatLayout`: `docked` or `floating` — the same values as the game's `ChatLayout` preference. For the floating drawer you can control and persist its position with `[(chroniclePosition)]` (`{ left, bottom }` in px from the shell's bottom-left).
+
+```html
+<lg-game-shell [chatLayout]="chatLayout()" [backdrop]="backdrop" [(chroniclePosition)]="chatPosition">
+  <lg-shell-rail><app-rail-grimoire /></lg-shell-rail>
+  <lg-shell-top><lg-top-bar [heading]="name" [eyebrow]="'Lv. ' + level" showMenu>…</lg-top-bar></lg-shell-top>
+  <lg-shell-chronicle><app-chat-grimoire /></lg-shell-chronicle>
+  <lg-page>…</lg-page>
+</lg-game-shell>
+```
+
+Its styles are its own (emulated): each region carries its place, and it reaches the parts in it only through their inherited properties — the TopBar's `--lg-topbar-bg` and `--lg-topbar-rule`, the Chronicle's `--lg-chronicle-*`, the Folio's `--lg-folio-height`, the compact rail header's `--lg-rail-header-rule` — and container queries on `lg-shell`, which a part inside answers itself.
 
 **Backdrop** (D-107). `backdrop` takes an image — in the game, its textured backdrop — painted at Level 0 behind the rail, the stage and the docked Chronicle. Over it the rail and the docked Chronicle take Level 1's translucent `surface` (D-102), and a Page shows it (D-101); without it the shell is `ground`. Over a backdrop the TopBar is a band of the frame too — `surface` with a hairline under it — and the stage starts below it rather than under it, so nothing scrolls beneath a translucent band (D-115).
 
@@ -34,7 +45,7 @@ The full-screen frame every in-game screen sits in: NavRail on the left, the sta
 | --- | --- |
 | Role and name | `main` holds the stage and TopBar; the rail, Folio and Chronicle name themselves |
 | Keyboard | "Skip to content" is the first tab stop; then the rail, TopBar, stage, Folio and Chronicle in that order. Under 60rem the rail is a drawer: Escape closes it |
-| Focus | Opening the drawer moves focus to its first item and makes the rest `inert`; closing returns focus to the menu button |
+| Focus | Opening the drawer moves focus to its first control and holds it there (the CDK's focus trap: Tab past its last control comes back to its first) while the rest is `inert`; closing returns focus to the menu button |
 | Announced | Nothing of its own; one announcer (`LgAnnouncer`) serves the app |
 | Hover and tap | Nothing |
 | Target size | The menu button is 36px |

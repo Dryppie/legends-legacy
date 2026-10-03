@@ -1,0 +1,21 @@
+/* ---------- Region state (D-145) ----------
+   Where a region's content would be: its sentence and next step in body-compact ink-muted, and its way forward after
+   them. No fill or inset of its own: it stands in its region's (a Panel's, a List's), so nothing is padded twice; a
+   screen that shows it straight on the Page gives the host a surface and an inset. Error is the ✕ and its sentence in
+   danger (Standards · States · Data); the next step stays ink-muted. Loading shows the still blocks first and its
+   words under them once the wait passes a second, in room kept for them, so nothing shifts. */
+:host {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--lg-space-2) var(--lg-space-4);
+  font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact); color: var(--lg-ink-muted);
+}
+.lg-rstate__line { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 0.25em; flex: 1 1 16rem; min-width: 0; margin: 0; }
+.lg-rstate__detail:empty { display: none; }
+:host(.lg-rstate--error) .lg-rstate__glyph, :host(.lg-rstate--error) .lg-rstate__heading { color: var(--lg-danger); }
+.lg-rstate__glyph { font-weight: 700; }
+
+:host(.lg-rstate--loading) { flex-direction: column; align-items: stretch; }
+:host(.lg-rstate--loading) .lg-rstate__line { display: grid; row-gap: var(--lg-space-2); flex: none; }
+:host(.lg-rstate--loading) .lg-rstate__detail { order: -1; display: block; }
+/* The words wait a second before they show: an animation with no length, only the delay. */
+@keyframes lg-rstate-wait { from { visibility: hidden; } }
+:host(.lg-rstate--loading) .lg-rstate__heading { animation: lg-rstate-wait 0s linear 1s backwards; }

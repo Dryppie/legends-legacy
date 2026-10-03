@@ -1,0 +1,13 @@
+/* ---------- Field ----------
+   The label above the control, the hint or the error under it. The control styles itself (input[lgInput]). */
+:host { display: grid; min-width: 0; }
+.lg-field__label { margin-bottom: var(--lg-space-1); font-family: var(--lg-font-ui); font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact); font-weight: 600; color: var(--lg-ink); }
+.lg-field__required { color: var(--lg-ink-muted); font-weight: 400; }
+.lg-field__foot { margin-top: var(--lg-space-1); }
+/* No hint and no error: the foot takes no room. */
+.lg-field__foot:not(:has(.lg-field__hint)):has(.lg-field__error:empty) { margin-top: 0; }
+.lg-field__hint, .lg-field__error { margin: 0; font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); }
+/* Error (Standards · States): text and icon, the ✕ and the message in danger. */
+.lg-field__error { display: flex; align-items: baseline; gap: var(--lg-space-1); color: var(--lg-danger); }
+.lg-field__error:empty { display: block; }
+.lg-field__glyph { flex: none; font-weight: 700; }

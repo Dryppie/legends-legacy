@@ -1,0 +1,39 @@
+/* ---------- GameShell · the Chronicle's place ---------- */
+/* Chat layout "docked": the Chronicle is a shell region on Level 0 in the right-hand column, a line rule at its start. */
+:host(.is-docked) {
+  display: block; grid-area: chat; position: relative; z-index: var(--lg-z-folio); min-width: 0; min-height: 0; container-type: inline-size;
+  --lg-chronicle-h: var(--lg-chat-h, min(var(--lg-chronicle-height), 45vh));
+  --lg-chronicle-edge-left: var(--lg-border-hairline) solid var(--lg-line);
+  --lg-chronicle-rot: var(--lg-chat-rot, 0deg);
+}
+:host(.is-docked.on-backdrop) { --lg-chronicle-bg: var(--lg-surface); }
+@container lg-shell (min-width: 60rem) {
+  /* The docked Chronicle's head is as tall as the TopBar, so their rules are one line across the frame. */
+  :host(.is-docked:not(.beside-folio)) { --lg-chronicle-edge-top: 0; --lg-chronicle-head-min: var(--lg-topbar-height); }
+}
+
+/* Chat layout "floating": a drawer over the stage, draggable by its grip. */
+:host(.is-floating) {
+  display: block; position: absolute; z-index: var(--lg-z-chat-float);
+  right: var(--lg-space-6); bottom: var(--lg-space-6);
+  width: min(var(--lg-chronicle-float-width), calc(100% - 2 * var(--lg-space-6)));
+}
+:host(.is-floating.beside-folio) { right: calc(var(--lg-folio-width) + var(--lg-space-6)); }
+:host(.is-floating.is-placed) { left: var(--lg-float-left); bottom: var(--lg-float-bottom); right: auto; }
+@container lg-shell (min-width: 96rem) {
+  :host(.is-floating) { width: var(--lg-chronicle-float-width-wide); }
+}
+
+/* Both layouts become the bottom dock on small screens: opaque even over the frame's backdrop, since it sits over
+   content (D-102), with neither grip nor tall toggle. */
+@container lg-shell (max-width: 59.9375rem) {
+  :host(.is-docked), :host(.is-floating), :host(.is-floating.is-placed) {
+    grid-area: chat; position: sticky; bottom: 0; left: auto; right: auto; width: auto; z-index: var(--lg-z-chat-float);
+  }
+  :host, :host(.is-docked.on-backdrop) { --lg-chronicle-bg: var(--lg-surface-solid); --lg-chronicle-float-tools: none; }
+  :host(.is-docked) { --lg-chronicle-edge-left: 0; }
+  :host(.is-floating) {
+    --lg-chronicle-float-radius: 0; --lg-chronicle-float-border-width: var(--lg-border-hairline) 0 0;
+    --lg-chronicle-float-h: var(--lg-chronicle-height);
+  }
+}

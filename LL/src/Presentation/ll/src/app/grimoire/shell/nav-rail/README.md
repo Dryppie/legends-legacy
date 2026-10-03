@@ -6,7 +6,20 @@ The main navigation.
 
 The game's primary navigation: the sidebar's real sections (Character, World, City, System) as a quiet column of spaced capitals, three words at most.
 
-**Provide:** `sections` (`[{ label, items: [{ id, title, description?, icon, badge?, badgeLabel?, locked?, reason?, ready? }] }]`), `activeId`, `(navigate)`, and a `header` slot (the Logo asset plus the wordmark, then in the game the current action as an Activity, D-109). A locked item needs its `reason`: how it unlocks.
+**Provide:** the rail by composition (D-141): `lg-nav-rail` (`label`, "Game" by default; `compact`) holding an `lg-nav-section` per group (`label`) and in each an `a[lgNavItem]` per destination — its content is the title; `icon`, `description`, `badge` and `badgeLabel`, `ready`, and `locked` with its `reason` (how it unlocks). Link it with `routerLink`, and let `routerLinkActive` with `ariaCurrentWhenActive="page"` mark the current page: the current item is the one whose `aria-current` is "page" (set it yourself where the place isn't a route, or the router can't express it — the game's World Map is current on any screen inside the world but the Tower's). A press is the link; your `(click)` hears it, and on a locked item never runs. Put the Logo and wordmark, or in the game the current action as an Activity (D-109), in an `lg-nav-rail-header`, and extras in an `lg-nav-rail-footer`. Declare sections and items inside the `lg-nav-rail` (in `@for` and `@if` as you like): they learn `compact` from it.
+
+```html
+<lg-nav-rail [compact]="compact()">
+  <lg-nav-rail-header><button lgActivity …></button></lg-nav-rail-header>
+  <lg-nav-section label="Character">
+    <a lgNavItem routerLink="/game/character/inventory" routerLinkActive ariaCurrentWhenActive="page"
+       icon="inventory" description="Items, gear, misc" [badge]="3" badgeLabel="3 new items">Inventory</a>
+    <a lgNavItem locked reason="Unlocks at level 20" icon="colosseum">Colosseum</a>
+  </lg-nav-section>
+</lg-nav-rail>
+```
+
+A locked item needs no link: it stays a link in the Tab order without one. It is `locked`, not `state="locked"`: RouterLink, on the same element, has a `state` input.
 
 - Items are `nav` style in `ink-muted`; group labels are `label` style in `ink-muted` with a trailing `line` rule (D-021). Hover takes the neutral `surface-raised` wash.
 - The active item is `nav-active` — Barlow 600, a weight change rather than a face change (D-030) — in `ink` with the icon at full strength, a 2px `gilt` bar at its start and a `gilt` wash fading toward its end — the game's own mark for where you are, gilt's first job (D-118; an accepted exception to the no-gradient rule). Items are rows, so their hover wash takes `radius-container`.
@@ -14,7 +27,7 @@ The game's primary navigation: the sidebar's real sections (Character, World, Ci
 - **Motion** (Foundations · Motion): hover fades the `surface-raised` wash in and out over `duration-fast` on `ease-standard` — a layer's opacity, not a background transition — and the title turns `ink` at once. The active item, its weight, its bar and its wash move at once: the current location never animates. As GameShell's drawer under 60rem, the rail slides in over `duration-base` on `ease-enter` and out over `duration-fast` on `ease-exit`, then hides. Under reduced motion all of it happens at once.
 - Item icons are 20px (`icon-md`) and `gilt`, at rest as well as on the active item (D-105): the game's sidebar has always drawn them in gold. A locked item's icon is `ink-disabled` with its title. The current location is still told by the bar, the wash, the weight and `ink`, never by the icon's colour alone.
 - **Descriptions** (D-104): an item may carry a `description`, a short line under its title in `caption` sentence case, `ink-muted` — "Stats, vitals, loadout" — so a destination is never known by its icon alone. It truncates rather than wraps, and compact hides it.
-- `compact` shows icons only, for a collapsed desktop rail the player chose: each keeps its section's name as tooltip and accessible name. It is the one place a navigation icon stands alone. Its items fill the rail's width but for a `space-1` margin, 2.75rem tall, so the current item's bar and wash span it (D-119); in a GameShell its header — the compact Activity — is a band as tall as the TopBar (D-115, D-117).
+- `compact` shows icons only, for a collapsed desktop rail the player chose: each title stays the item's accessible name, read but not shown, and is its tooltip; a locked item's reason tip names it. It is the one place a navigation icon stands alone. Its items fill the rail's width but for a `space-1` margin, 2.75rem tall, so the current item's bar and wash span it (D-119); in a GameShell its header — the compact Activity — is a band as tall as the TopBar (D-115, D-117).
 - **Locked items stay in reach** (Standards · States, D-087). The title is `ink-disabled` with the 12px `lock` marker where the badge goes (D-113; "Locked" is still what screen readers hear); it stays in the Tab order (`aria-disabled`), takes no hover wash, and its unlock condition opens in the reason tip beside the rail on hover and focus. A click or Enter pins the condition and announces it, and never navigates. In `compact` the tip names the item too. It used to leave the pointer out (`pointer-events: none`) while staying in the Tab order — the gap the audit found.
 - Don't add icons of your own; use names from `LG_ICON_NAMES` so every item matches.
 
@@ -33,11 +46,11 @@ The game's primary navigation: the sidebar's real sections (Character, World, Ci
 
 | Field | Notes |
 | --- | --- |
-| Role and name | A `nav` named by `label` ("Game"); items are links named by their title, the current one `aria-current="page"`; a locked one `aria-disabled`, described by its condition |
+| Role and name | A navigation named by `label` ("Game"); each section a group named by its label; items are links named by their title (in `compact` too: the title is hidden, not removed), the current one `aria-current="page"`; a locked one a link with `aria-disabled`, in the Tab order with or without an href, described by its condition |
 | Keyboard | Tab moves through the items, locked ones included; Enter follows a link, or on a locked item shows its condition |
 | Focus | `focus-ring` |
 | Announced | The title, "current page", a badge's `badgeLabel`, a locked item's condition |
-| Hover and tap | The wash; in `compact`, the title as a tooltip. A locked item opens its reason tip, which a tap pins and Escape closes |
+| Hover and tap | The wash; in `compact`, the title as a Grimoire tooltip beside the item. A locked item opens its reason tip, which a tap pins and Escape closes |
 | Target size | 30px rows; in `compact`, items 44px tall across the rail's width but for a 4px margin (D-119) |
 | Text scaling | Titles truncate; the rail scrolls |
 | Colour | Current is also a bar and a weight; a badge is also a number; locked is also its word |

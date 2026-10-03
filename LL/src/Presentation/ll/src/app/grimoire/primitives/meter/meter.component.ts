@@ -12,35 +12,34 @@ export type LgMeterTone = 'hp' | 'sp' | 'xp';
 @Component({
   selector: 'lg-meter',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: 'display: contents' },
+  host: { '[class]': 'classes()' },
   template: `
-    <div [class]="classes()">
-      @if (label() || showValue()) {
-        <div class="lg-meter__head">
-          @if (label()) {
-            <span class="lg-meter__label">{{ label() }}</span>
-          }
-          @if (showValue()) {
-            <span class="lg-meter__value" [style.min-width]="reserve() + 'ch'"
-              >{{ format(value()) }}<span class="lg-meter__max">{{ nbsp }}/{{ nbsp }}{{ format(max()) }}</span
-              >@if (unit()) {<span class="lg-unit">{{ nbsp }}{{ unit() }}</span>}</span
-            >
-          }
-        </div>
-      }
-      <div
-        class="lg-meter__track"
-        role="meter"
-        aria-valuemin="0"
-        [attr.aria-valuemax]="max()"
-        [attr.aria-valuenow]="value()"
-        [attr.aria-valuetext]="valueText()"
-        [attr.aria-label]="ariaLabel() || label() || tone()"
-      >
-        <div class="lg-meter__fill" [style.--lg-meter-p]="fraction()"></div>
+    @if (label() || showValue()) {
+      <div class="lg-meter__head">
+        @if (label()) {
+          <span class="lg-meter__label">{{ label() }}</span>
+        }
+        @if (showValue()) {
+          <span class="lg-meter__value" [style.min-width]="reserve() + 'ch'"
+            >{{ format(value()) }}<span class="lg-meter__max">{{ nbsp }}/{{ nbsp }}{{ format(max()) }}</span
+            >@if (unit()) {<span class="lg-unit">{{ nbsp }}{{ unit() }}</span>}</span
+          >
+        }
       </div>
+    }
+    <div
+      class="lg-meter__track"
+      role="meter"
+      aria-valuemin="0"
+      [attr.aria-valuemax]="max()"
+      [attr.aria-valuenow]="value()"
+      [attr.aria-valuetext]="valueText()"
+      [attr.aria-label]="ariaLabel() || label() || tone()"
+    >
+      <div class="lg-meter__fill" [style.--lg-meter-p]="fraction()"></div>
     </div>
   `,
+  styleUrl: './meter.component.css',
 })
 export class LgMeterComponent {
   readonly value = input.required<number>();

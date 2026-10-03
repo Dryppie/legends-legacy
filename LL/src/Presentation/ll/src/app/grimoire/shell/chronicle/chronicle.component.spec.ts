@@ -5,9 +5,12 @@ import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { LgChronicleHarness } from '../../testing/chronicle.harness';
 import { lgWatchAnnouncements } from '../../testing/announcer';
 import {
+  LgChronicleAsideComponent,
   LgChronicleChannel,
   LgChronicleComponent,
+  LgChronicleComposerComponent,
   LgChronicleMessage,
+  LgChronicleMessageDirective,
 } from './chronicle.component';
 
 // The data the parity cases used (D-130), before the parity check was retired.
@@ -150,7 +153,90 @@ const nextFrame = () =>
     requestAnimationFrame(() => setTimeout(resolve)),
   );
 
+// A Chronicle with its regions and a message template, as the game's chat composes it.
+@Component({
+  imports: [
+    LgChronicleComponent,
+    LgChronicleAsideComponent,
+    LgChronicleComposerComponent,
+    LgChronicleMessageDirective,
+  ],
+  template: `
+    <lg-chronicle
+      [channels]="channels"
+      [messages]="messages"
+      [open]="open()"
+      label="Chat"
+    >
+      <ng-template lgChronicleMessage let-message
+        ><b class="sc-text">{{ message.text.toUpperCase() }}</b></ng-template
+      >
+      <lg-chronicle-aside
+        ><span class="sc-online">12 online</span></lg-chronicle-aside
+      >
+      <lg-chronicle-composer
+        ><input class="sc-own" aria-label="Own composer"
+      /></lg-chronicle-composer>
+    </lg-chronicle>
+  `,
+})
+class ComposedChronicleHost {
+  readonly channels = CHANNELS;
+  readonly messages = MESSAGES;
+  readonly open = signal(true);
+}
+
 describe('LgChronicleComponent', () => {
+  describe('regions and the message template', () => {
+    let fixture: ComponentFixture<ComposedChronicleHost>;
+    let chronicle: LgChronicleHarness;
+
+    beforeEach(async () => {
+      fixture = TestBed.createComponent(ComposedChronicleHost);
+      chronicle =
+        await TestbedHarnessEnvironment.loader(fixture).getHarness(
+          LgChronicleHarness,
+        );
+    });
+
+    it('is a region named by its label', async () => {
+      const host: HTMLElement =
+        fixture.nativeElement.querySelector('lg-chronicle');
+      expect(host.getAttribute('role')).toBe('region');
+      expect(await chronicle.getLabel()).toBe('Chat');
+    });
+
+    it('draws each line’s text with the template, given the message', () => {
+      const texts = Array.from(
+        fixture.nativeElement.querySelectorAll('.lg-chronicle__text .sc-text'),
+        (el: Element) => el.textContent,
+      );
+      expect(texts).toEqual(MESSAGES.map((m) => m.text.toUpperCase()));
+    });
+
+    it('puts the aside in the head and the composer in the built-in one’s place', () => {
+      const el: HTMLElement = fixture.nativeElement;
+      expect(
+        el.querySelector('.lg-chronicle__head > lg-chronicle-aside .sc-online'),
+      ).not.toBeNull();
+      expect(
+        el.querySelector('lg-chronicle > lg-chronicle-composer .sc-own'),
+      ).not.toBeNull();
+      expect(el.querySelector('form.lg-chronicle__composer')).toBeNull();
+    });
+
+    it('collapsed, it keeps the aside and drops the composer', async () => {
+      fixture.componentInstance.open.set(false);
+      fixture.detectChanges();
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.querySelector('lg-chronicle-aside')?.classList).toContain(
+        'is-collapsed',
+      );
+      expect(el.querySelector('.sc-own')?.isConnected).toBeFalsy();
+      expect(await chronicle.isOpen()).toBeFalse();
+    });
+  });
+
   describe('author actions (i-chronicle-author)', () => {
     let fixture: ComponentFixture<AuthorHost>;
     let chronicle: LgChronicleHarness;

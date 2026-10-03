@@ -107,12 +107,16 @@
 /* Key nouns in lore — <b> or <strong> in text set in a lore style — are weight 500 in ink (the Folio's lore, which takes
    the style through lg-type-lore). A part can't style the words projected into it, so the rule lives with the type. */
 :is(.lg-type-lore, .lg-type-lore-sm) :is(b, strong) { font-weight: 500; color: var(--lg-ink); }
+/* A link among a ProfileIdentity's facts (the Guild) is a text link: ink, underlined. The link is the host's content,
+   which the part's own styles can't reach. */
+.lg-identity__facts a { color: var(--lg-ink); font-weight: 600; text-decoration: underline; text-decoration-color: var(--lg-line-strong); text-underline-offset: 0.1875rem; }
+.lg-identity__facts a:hover { text-decoration-color: var(--lg-ink); }
 
 /* Reduced motion: every transition and animation in the system collapses to its end state, as the game does today
    (Foundations · Motion). The tokens keep their values; the durations are overridden here. data-motion="reduced" on any
    ancestor does the same for its subtree — an in-game setting, or the reduced twin in a specimen. */
 @media (prefers-reduced-motion: reduce) {
-  :where(.lg-root, .lg-shell, .lg-tip), :where(.lg-root, .lg-shell, .lg-tip) *, :where(.lg-root, .lg-shell) *::before, :where(.lg-root, .lg-shell) *::after {
+  :where(.lg-root, .lg-shell, .lg-tip, .lg-dialog-scrim), :where(.lg-root, .lg-shell, .lg-tip) *, :where(.lg-root, .lg-shell) *::before, :where(.lg-root, .lg-shell) *::after {
     animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important; transition-delay: 0s !important; scroll-behavior: auto !important;
   }
@@ -145,7 +149,6 @@
 /* Forced colours (Windows contrast themes) drop box-shadows, so focus and selection fall back to system outlines. */
 @media (forced-colors: active) {
   :where(.lg-root, .lg-shell) :focus-visible { outline: 2px solid CanvasText !important; outline-offset: 2px; }
-  .lg-meter__fill { forced-color-adjust: none; }
   /* The attention diamond is a solid shape: keep it, in the text colour (ItemSlot keeps its in-use square itself). */
   .lg-attention::before { forced-color-adjust: none; background: CanvasText; }
 }
@@ -167,10 +170,6 @@
 .lg-root *, .lg-shell * { box-sizing: border-box; }
 /* Form controls reset fonts in the browser's own styles; keep the root's tabular figures in them. */
 .lg-root :where(button, input, select, textarea), .lg-shell :where(button, input, select, textarea) { font-variant-numeric: inherit; }
-/* An icon is its size (lg-icon's size, set as --lg-icon-size), unless a box it sits in fits it to another through
-   --lg-icon-fit (the dense PageHeader's 18px glyph, D-120), and opaque unless the box fades it through --lg-icon-opacity
-   (a not-owned ItemSlot's art, D-139). */
-.lg-icon { display: inline-block; flex: none; vertical-align: middle; width: var(--lg-icon-fit, var(--lg-icon-size, var(--lg-icon-md))); height: var(--lg-icon-fit, var(--lg-icon-size, var(--lg-icon-md))); opacity: var(--lg-icon-opacity, 1); }
 /* The skip link: the first tab stop in the shell, shown when focused (WCAG 2.4.1). */
 .lg-skip { position: absolute; left: var(--lg-space-3); top: var(--lg-space-3); z-index: var(--lg-z-overlay); padding: var(--lg-space-2) var(--lg-space-4); border-radius: var(--lg-radius-control); background: var(--lg-surface-raised); color: var(--lg-ink); font-weight: 600; text-decoration: none; transform: translateY(-200%); }
 .lg-skip:focus-visible { transform: none; outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); }

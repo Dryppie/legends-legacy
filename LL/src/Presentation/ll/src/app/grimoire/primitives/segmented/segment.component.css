@@ -1,0 +1,18 @@
+/* ---------- Segment ----------
+   Its words in ink-muted; chosen is selected, arcana's job (Foundations · Colour, Standards · States): the arcana-soft
+   fill with an arcana ring, and the words in ink. */
+:host {
+  position: relative; display: inline-flex; align-items: center; justify-content: center; flex: 1 1 auto; min-width: 0;
+  padding: 0 var(--lg-space-4); margin: calc(-1 * var(--lg-border-hairline)) 0; border-radius: var(--lg-radius-control);
+  font-family: var(--lg-font-ui); font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact); font-weight: 600;
+  color: var(--lg-ink-muted); white-space: nowrap; cursor: pointer; user-select: none;
+}
+:host(:not(:first-child))::before { content: ""; position: absolute; left: 0; top: var(--lg-space-2); bottom: var(--lg-space-2); width: var(--lg-border-hairline); background: var(--lg-line); }
+:host(:hover) { color: var(--lg-ink); background: var(--lg-surface-raised); }
+:host(:focus-visible) { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); z-index: 1; }
+:host([aria-checked='true']) { color: var(--lg-ink); background: var(--lg-arcana-soft); box-shadow: inset 0 0 0 var(--lg-border-hairline) var(--lg-arcana); z-index: 1; }
+:host([aria-checked='true']:focus-visible) { box-shadow: var(--lg-focus-ring), inset 0 0 0 var(--lg-border-hairline) var(--lg-arcana); }
+/* The rule beside a chosen segment gives way to its ring. */
+:host([aria-checked='true'])::before, :host(.is-after-chosen)::before { display: none; }
+:host([aria-disabled='true']) { color: var(--lg-ink-disabled); background: none; cursor: not-allowed; }
+@media (forced-colors: active) { :host([aria-checked='true']) { outline: 2px solid Highlight; outline-offset: -2px; } }

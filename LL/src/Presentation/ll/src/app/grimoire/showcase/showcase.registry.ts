@@ -41,6 +41,20 @@ import { STAGE_SHOWCASE } from './entries/stage.showcase';
 import { ACTIVITY_SHOWCASE } from './entries/activity.showcase';
 import { OBJECTIVE_SHOWCASE } from './entries/objective.showcase';
 import { CHRONICLE_SHOWCASE } from './entries/chronicle.showcase';
+import { FIELD_SHOWCASE } from './entries/field.showcase';
+import { CHECKBOX_SHOWCASE } from './entries/checkbox.showcase';
+import { SWITCH_SHOWCASE } from './entries/switch.showcase';
+import { RADIO_SHOWCASE } from './entries/radio.showcase';
+import { SEGMENTED_SHOWCASE } from './entries/segmented.showcase';
+import { ICON_BUTTON_SHOWCASE } from './entries/icon-button.showcase';
+import { SKELETON_SHOWCASE } from './entries/skeleton.showcase';
+import { DIALOG_SHOWCASE } from './entries/dialog.showcase';
+import { TOAST_SHOWCASE } from './entries/toast.showcase';
+import { REGION_STATE_SHOWCASE } from './entries/region-state.showcase';
+import { SELECT_SHOWCASE } from './entries/select.showcase';
+import { POPOVER_SHOWCASE } from './entries/popover.showcase';
+import { MENU_SHOWCASE } from './entries/menu.showcase';
+import { TABLE_SHOWCASE } from './entries/table.showcase';
 
 /**
  * Every showcase entry, by tier, in the order the navigation lists them. A new Grimoire component adds its entry here.
@@ -58,6 +72,19 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
   TABS_SHOWCASE,
   METER_SHOWCASE,
   SECTION_RULE_SHOWCASE,
+  FIELD_SHOWCASE,
+  CHECKBOX_SHOWCASE,
+  SWITCH_SHOWCASE,
+  RADIO_SHOWCASE,
+  SEGMENTED_SHOWCASE,
+  ICON_BUTTON_SHOWCASE,
+  SKELETON_SHOWCASE,
+  DIALOG_SHOWCASE,
+  TOAST_SHOWCASE,
+  SELECT_SHOWCASE,
+  POPOVER_SHOWCASE,
+  MENU_SHOWCASE,
+  TABLE_SHOWCASE,
   // Components
   PANEL_SHOWCASE,
   PAGE_SHOWCASE,
@@ -65,6 +92,7 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
   BANNER_SHOWCASE,
   FOLIO_SHOWCASE,
   NOTICE_SHOWCASE,
+  REGION_STATE_SHOWCASE,
   LEDGER_SHOWCASE,
   STAT_FIGURE_SHOWCASE,
   DELTA_SHOWCASE,

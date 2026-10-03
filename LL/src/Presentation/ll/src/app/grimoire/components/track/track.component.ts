@@ -6,31 +6,30 @@ export type LgTrackTone = 'gilt' | 'hp' | 'arcana';
 @Component({
   selector: 'lg-track',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: 'display: contents' },
+  host: { '[class]': "'lg-track lg-track--' + (tone() || 'gilt')" },
   template: `
-    <div [class]="'lg-track lg-track--' + (tone() || 'gilt')">
-      @if (startLabel()) {
-        <span class="lg-track__end">{{ startLabel() }}</span>
-      }
-      <div
-        class="lg-track__rail"
-        role="progressbar"
-        aria-valuemin="1"
-        [attr.aria-valuemax]="stepCount()"
-        [attr.aria-valuenow]="currentStep() + 1"
-        [attr.aria-valuetext]="valueText()"
-        [attr.aria-label]="label() || 'Progress'"
-      >
-        <span class="lg-track__fill" [style.width.%]="fillPercent()"></span>
-        @for (node of nodes(); track node.index) {
-          <span [class]="'lg-track__node ' + node.state" [style.left.%]="node.left" [attr.title]="node.title"></span>
-        }
-      </div>
-      @if (endLabel()) {
-        <span class="lg-track__end">{{ endLabel() }}</span>
+    @if (startLabel()) {
+      <span class="lg-track__end">{{ startLabel() }}</span>
+    }
+    <div
+      class="lg-track__rail"
+      role="progressbar"
+      aria-valuemin="1"
+      [attr.aria-valuemax]="stepCount()"
+      [attr.aria-valuenow]="currentStep() + 1"
+      [attr.aria-valuetext]="valueText()"
+      [attr.aria-label]="label() || 'Progress'"
+    >
+      <span class="lg-track__fill" [style.width.%]="fillPercent()"></span>
+      @for (node of nodes(); track node.index) {
+        <span [class]="'lg-track__node ' + node.state" [style.left.%]="node.left" [attr.title]="node.title"></span>
       }
     </div>
+    @if (endLabel()) {
+      <span class="lg-track__end">{{ endLabel() }}</span>
+    }
   `,
+  styleUrl: './track.component.css',
 })
 export class LgTrackComponent {
   readonly steps = input<number>(5);

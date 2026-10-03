@@ -1,88 +1,18 @@
 /* ---------- NavRail ---------- */
-.lg-rail {
+:host {
   display: flex; flex-direction: column; gap: var(--lg-space-6);
   height: 100%; min-height: 0;
   padding: var(--lg-space-8) var(--lg-space-3) var(--lg-space-6) var(--lg-space-4);
   background: var(--lg-surface);
   overflow: auto;
 }
-.lg-rail__header { display: flex; align-items: center; gap: var(--lg-space-3); padding-left: var(--lg-space-1); }
 .lg-rail__sections { display: flex; flex-direction: column; gap: var(--lg-space-4); }
-.lg-rail__group {
-  display: flex; align-items: center; gap: var(--lg-space-2);
-  margin: 0 0 var(--lg-space-1) var(--lg-space-1);
-  font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ink-muted);
-}
-.lg-rail__group::after { content: ""; flex: 1; height: var(--lg-border-hairline); background: var(--lg-line); }
-.lg-rail ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
-.lg-rail__item {
-  position: relative;
-  display: flex; align-items: center; gap: var(--lg-space-3);
-  min-height: 1.875rem; padding: 0 0.625rem;
-  border-radius: var(--lg-radius-container);
-  color: var(--lg-ink-muted); text-decoration: none; white-space: nowrap;
-  font-family: var(--lg-font-ui); font-size: var(--lg-text-nav); line-height: var(--lg-leading-nav); font-weight: 500; letter-spacing: var(--lg-tracking-nav); text-transform: uppercase;
-  isolation: isolate;
-}
-.lg-rail__item { --lg-rail-icon: var(--lg-gilt); }
-/* The rail's icons are gilt at rest as well as when active (D-105): the game's sidebar has always drawn them in gold. The current
-   location is still told by the diamond, the weight and ink; a locked item's icon steps back with its title. */
-.lg-rail__item .lg-icon { color: var(--lg-rail-icon); opacity: 0.85; }
-.lg-rail__text { display: grid; min-width: 0; }
-.lg-rail__desc {
-  overflow: hidden; text-overflow: ellipsis;
-  font-family: var(--lg-font-ui); font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); font-weight: 400; letter-spacing: 0; text-transform: none;
-  color: var(--lg-ink-muted);
-}
-.lg-rail__item:has(.lg-rail__desc) { min-height: 2.75rem; padding-top: var(--lg-space-1); padding-bottom: var(--lg-space-1); }
-.lg-rail__item.is-locked { --lg-rail-icon: var(--lg-ink-disabled); }
-.lg-rail__item.is-locked .lg-rail__desc { color: var(--lg-ink-disabled); }
-/* Feedback: the hover wash is a layer that fades over duration-fast; the title turns ink at once. The current location
-   (the active item, its wash and its bar) moves at once, like any change of place. */
-.lg-rail__item::after {
-  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; border-radius: inherit;
-  background: var(--lg-surface-raised); opacity: 0; transition: opacity var(--lg-duration-fast) var(--lg-ease-standard);
-}
-.lg-rail__item:hover { color: var(--lg-ink); }
-.lg-rail__item:hover::after { opacity: 1; }
-.lg-rail__item.is-active {
-  color: var(--lg-rail-active-ink); background: var(--lg-rail-active-bg);
-  font-family: var(--lg-rail-active-family);
-}
-.lg-rail__item.is-active {
-  font-weight: 600;
-}
-.lg-rail__item.is-active .lg-icon { opacity: 1; }
-/* …and a 2px gilt bar at its start, as the game's sidebar always marked where you are (D-118). */
-.lg-rail__item.is-active::before {
-  content: ""; position: absolute; left: 0; top: var(--lg-space-2); bottom: var(--lg-space-2); width: 2px;
-  border-radius: var(--lg-radius-control); background: var(--lg-gilt);
-}
-.lg-rail__item.is-locked { color: var(--lg-ink-disabled); cursor: not-allowed; }
-/* Locked stays in the Tab order (Standards · States): no hover wash, "Locked" where the badge goes, and the unlock
-   condition in the reason tip beside the item. */
-.lg-rail__item.is-locked:hover { color: var(--lg-ink-disabled); }
-.lg-rail__item.is-locked::after { display: none; }
-/* The word is set small and in sentence case so it fits beside a long title; the 12px lock marker replaces it once drawn. */
-.lg-rail__lock { flex: none; margin-left: auto; font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--lg-ink-muted); }
-.lg-rail__item.is-locked .lg-rail__title { min-width: 0; }
-.lg-rail__badge {
-  margin-left: auto; min-width: 1.125rem; height: 1.125rem; padding: 0 0.3125rem;
-  display: grid; place-items: center; border-radius: var(--lg-radius-control);
-  background: var(--lg-arcana-soft); color: var(--lg-arcana);
-  font-family: var(--lg-font-ui); font-size: var(--lg-text-caption); line-height: var(--lg-leading-mark); font-weight: 600; letter-spacing: 0; text-shadow: none;
-}
-.lg-rail__footer { margin-top: auto; }
 /* Compact items fill the rail's width but for a space-1 margin, as the game's compact sidebar drew them (D-119). */
-.lg-rail--compact { padding-left: var(--lg-space-1); padding-right: var(--lg-space-1); align-items: stretch; }
-.lg-rail__title { overflow: hidden; text-overflow: ellipsis; }
-.lg-rail--compact .lg-rail__title, .lg-rail--compact .lg-rail__desc, .lg-rail--compact .lg-rail__group { display: none; }
-.lg-rail--compact .lg-rail__item { justify-content: center; padding: 0; width: 100%; min-height: 2.75rem; }
-/* Compact (D-115): the description wrapper leaves the layout too, so the icon is centred; a count is a small mark pinned
-   to the icon's corner, ringed off from it, rather than a tile at the rail's edge. */
-.lg-rail--compact .lg-rail__text { display: none; }
-.lg-rail--compact .lg-rail__badge {
-  position: absolute; top: 0.125rem; left: calc(50% + 0.25rem); right: auto; margin: 0;
-  min-width: 1rem; height: 1rem; padding: 0 0.25rem; box-shadow: 0 0 0 2px var(--lg-surface-solid);
+:host(.lg-rail--compact) { padding-left: var(--lg-space-1); padding-right: var(--lg-space-1); align-items: stretch; }
+@container lg-shell (min-width: 60rem) {
+  /* In a GameShell a rail's header starts level with the TopBar's controls (a control is 1.875rem tall, centred in the
+     band)… */
+  :host(:has(> .lg-rail__header)) { padding-top: calc((var(--lg-topbar-height) - 1.875rem) / 2); }
+  /* …and a compact rail's header is a band of the same height (lg-nav-rail-header). */
+  :host(.lg-rail--compact:has(> .lg-rail__header)) { padding-top: 0; }
 }
-.lg-rail--compact .lg-rail__lock { display: none; }

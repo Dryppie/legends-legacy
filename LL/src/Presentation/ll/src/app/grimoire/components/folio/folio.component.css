@@ -2,7 +2,8 @@
 :host {
   position: relative;
   display: flex; flex-direction: column;
-  height: 100%; min-height: 0;
+  /* Its column's height; in a narrow GameShell, where it follows the stage, its own (lg-shell-folio). */
+  height: var(--lg-folio-height, 100%); min-height: 0;
   background: var(--lg-folio);
   color: var(--lg-ink);
   box-shadow: var(--lg-shadow-panel);

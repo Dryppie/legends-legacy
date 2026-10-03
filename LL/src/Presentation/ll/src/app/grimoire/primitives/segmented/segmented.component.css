@@ -1,0 +1,10 @@
+/* ---------- Segmented (Proposed, D-144) ----------
+   Joined segments in one well at radius-control, hairline rules between them, as tall as the region's controls. */
+:host { display: inline-grid; gap: var(--lg-space-1); min-width: 0; }
+.lg-segmented__label { font-family: var(--lg-font-ui); font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact); font-weight: 600; color: var(--lg-ink); }
+.lg-segmented__track {
+  display: inline-flex; align-items: stretch; min-width: 0; max-width: 100%; height: var(--lg-control); box-sizing: border-box;
+  border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-control); background: var(--lg-ground-deep);
+}
+:host(.is-disabled) .lg-segmented__label { color: var(--lg-ink-disabled); }
+:host(.is-disabled) .lg-segmented__track { border-color: var(--lg-line); background: transparent; }

@@ -18,39 +18,38 @@ export interface LgLevelPlateStat {
   selector: 'lg-level-plate',
   imports: [LgIconComponent, LgMeterComponent, LgValuePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: 'display: contents' },
+  host: { class: 'lg-levelplate' },
   template: `
-    <div class="lg-levelplate">
-      <div class="lg-levelplate__row">
-        <div class="lg-levelplate__level">
-          <span class="lg-levelplate__kicker">{{ kicker() || 'Level' }}</span>
-          <span class="lg-levelplate__num">{{ level() }}</span>
-        </div>
-        @if (aside()?.length) {
-          <ul class="lg-levelplate__aside">
-            @for (stat of aside(); track stat.label) {
-              <li>
-                @if (stat.icon) {
-                  <lg-icon [name]="stat.icon" [size]="16" />
-                }
-                <span class="lg-levelplate__aside-label">{{ stat.label }}</span>
-                @let v = (stat.unit ? unit(stat.value, stat.unit) : stat.value) | lgValue;
-                <b>{{ v.number }}<span class="lg-unit">{{ v.unit }}</span></b>
-              </li>
-            }
-          </ul>
-        }
+    <div class="lg-levelplate__row">
+      <div class="lg-levelplate__level">
+        <span class="lg-levelplate__kicker">{{ kicker() || 'Level' }}</span>
+        <span class="lg-levelplate__num">{{ level() }}</span>
       </div>
-      @if (xpMax() != null) {
-        <div class="lg-levelplate__xp">
-          <lg-meter tone="xp" [value]="xp() || 0" [max]="xpMax()!" [showValue]="false" [ariaLabel]="xpUnit() || 'Experience'" />
-          <span class="lg-levelplate__xptext"
-            >{{ fraction(xp() || 0, xpMax()) }}<span class="lg-unit">{{ nbsp }}{{ xpUnit() || 'EXP' }}</span></span
-          >
-        </div>
+      @if (aside()?.length) {
+        <ul class="lg-levelplate__aside">
+          @for (stat of aside(); track stat.label) {
+            <li>
+              @if (stat.icon) {
+                <lg-icon [name]="stat.icon" [size]="16" />
+              }
+              <span class="lg-levelplate__aside-label">{{ stat.label }}</span>
+              @let v = (stat.unit ? unit(stat.value, stat.unit) : stat.value) | lgValue;
+              <b>{{ v.number }}<span class="lg-unit">{{ v.unit }}</span></b>
+            </li>
+          }
+        </ul>
       }
     </div>
+    @if (xpMax() != null) {
+      <div class="lg-levelplate__xp">
+        <lg-meter tone="xp" [value]="xp() || 0" [max]="xpMax()!" [showValue]="false" [ariaLabel]="xpUnit() || 'Experience'" />
+        <span class="lg-levelplate__xptext"
+          >{{ fraction(xp() || 0, xpMax()) }}<span class="lg-unit">{{ nbsp }}{{ xpUnit() || 'EXP' }}</span></span
+        >
+      </div>
+    }
   `,
+  styleUrl: './level-plate.component.css',
 })
 export class LgLevelPlateComponent {
   readonly level = input.required<number | string>();

@@ -230,9 +230,9 @@ What exists today, and what is needed, by category. Names are the icons' planned
 | `filter` | Filter | Game | P1 | A funnel. The game's `settings/filters.svg` has a baked gradient |
 | `sort` | Sort | Needed | P1 | Open arrows, up and down, never triangles |
 | `refresh` | Refresh | Needed | P2 | An open arc with an arrowhead |
-| `close` | Close | Glyph × | P1 | Used twenty times in the game as × |
+| `close` | Close | Set (D-145) | P1 | Used twenty times in the game as ×; the Dialog's Close and the Toast's Dismiss |
 | `back` | Back | Game | P1 | The game's `Back.svg` (28 × 21) and `Left.svg` / `Right.svg` (16 × 38) are off the grid |
-| `expand` | Expand, and collapse turned over | Inline | P1 | The Chronicle's chevrons; the game uses ▸ ▾ |
+| `expand` | Expand, and collapse turned over | Set (D-145) | P1 | The Select's chevron (D-146); the Chronicle's chevrons, still inline there; the game uses ▸ ▾ |
 | `copy` | Copy | Needed | P2 | Two offset rectangles |
 | `link` | Link an item into chat | Needed | P2 | A chain link |
 | `whisper` | Whisper | Needed | P1 | Shared with Social |

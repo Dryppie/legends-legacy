@@ -1,0 +1,32 @@
+/* ---------- A menu's item (D-146) ----------
+   A row of body-compact words, at least 32px tall (target-primary), at radius-container, as an Option is. The item
+   the keys or the pointer are on takes the same wash as a highlighted Option (gilt-soft, queued with the Option's in
+   the audit); a disabled one steps back to ink-disabled. A checkbox item's box is the Checkbox's, smaller than its row:
+   a well with a line-strong edge, an arcana-glow fill with the tick in ground when checked. The focus ring is the
+   system's, raised over the next item; the menu's space-1 padding keeps it whole. */
+:host {
+  display: flex; align-items: center; gap: var(--lg-space-2); box-sizing: border-box; width: 100%;
+  min-height: var(--lg-target-primary); margin: 0; padding: 0.375rem var(--lg-space-3);
+  border: 0; border-radius: var(--lg-radius-container); background: none;
+  color: var(--lg-ink); font-family: var(--lg-font-ui); font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact-row);
+  text-align: start; cursor: pointer;
+}
+:host(:hover), :host(:focus) { background: var(--lg-gilt-soft); outline: none; }
+:host(:focus-visible) { position: relative; z-index: var(--lg-z-raised); box-shadow: var(--lg-focus-ring); }
+:host(.cdk-menu-item-disabled) { color: var(--lg-ink-disabled); cursor: not-allowed; background: none; }
+lg-icon { color: var(--lg-ink-muted); }
+.lg-menu__label { flex: 1 1 auto; min-width: 0; }
+.lg-menu__check {
+  position: relative; flex: none; display: grid; place-items: center; box-sizing: border-box; width: 1rem; height: 1rem;
+  border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-control); background: var(--lg-ground-deep);
+}
+:host(.is-checked) .lg-menu__check { background: var(--lg-arcana-glow); border-color: var(--lg-arcana-glow); }
+:host(.is-checked) .lg-menu__check::after {
+  content: ""; width: 0.3125rem; height: 0.5625rem; margin-top: -0.125rem;
+  border: solid var(--lg-ground); border-width: 0 0.125rem 0.125rem 0; transform: rotate(45deg);
+}
+@media (forced-colors: active) {
+  :host(:focus) { outline: 2px solid Highlight; outline-offset: -2px; }
+  :host(.is-checked) .lg-menu__check { forced-color-adjust: none; background: Highlight; border-color: Highlight; }
+  :host(.is-checked) .lg-menu__check::after { border-color: HighlightText; }
+}

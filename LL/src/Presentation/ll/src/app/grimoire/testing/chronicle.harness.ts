@@ -27,12 +27,11 @@ export class LgChronicleHarness extends ComponentHarness {
     );
   }
 
-  private readonly region = this.locatorFor('.lg-chronicle');
   private readonly tabs = this.locatorForAll('[role=tab]');
   private readonly log = this.locatorForOptional('.lg-chronicle__log');
   private readonly ticker = this.locatorForOptional('.lg-chronicle__ticker');
   private readonly collapseToggle = this.locatorForOptional(
-    '.lg-chronicle__toggle[aria-expanded]',
+    '.lg-chronicle__collapse',
   );
   private readonly jumpButton = this.locatorForOptional('.lg-chronicle__jump');
   private readonly grip = this.locatorForOptional('.lg-chronicle__grip');
@@ -42,7 +41,7 @@ export class LgChronicleHarness extends ComponentHarness {
   );
 
   async getLabel(): Promise<string | null> {
-    return (await this.region()).getAttribute('aria-label');
+    return (await this.host()).getAttribute('aria-label');
   }
 
   /* ---------- Channels ---------- */

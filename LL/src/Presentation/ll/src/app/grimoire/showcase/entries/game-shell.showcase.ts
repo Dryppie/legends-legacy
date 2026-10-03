@@ -13,13 +13,17 @@ import {
   LgKeyHint,
   LgKeyHintsComponent,
   LG_LIST,
-  LgNavRailComponent,
-  LgNavSection,
+  LgNavRailHeaderComponent,
   LgObjectiveComponent,
   LgPageComponent,
   LgPageHeaderComponent,
-  LgSlotDirective,
+  LgShellChronicleComponent,
+  LgShellFolioComponent,
+  LgShellHintsComponent,
+  LgShellRailComponent,
+  LgShellTopComponent,
   LgStageComponent,
+  LgTopBarCenterComponent,
   LgTopBarComponent,
 } from '@grimoire';
 import {
@@ -27,9 +31,11 @@ import {
   ShowcaseStoryDirective,
 } from '../showcase-story.directive';
 import { ShowcaseEntry } from '../showcase.types';
+import { ScNavRailComponent, ScNavSection } from './nav-rail.showcase';
 
-/** The game's rail. No routes: the items are plain `#` links, so a click stays on the showcase. */
-const NAV: readonly LgNavSection[] = [
+/** The game's rail, composed by the NavRail entry's sc-nav-rail. No routes: the items are plain `#` links, so a click
+ *  stays on the showcase. */
+const NAV: readonly ScNavSection[] = [
   {
     label: 'Character',
     items: [
@@ -190,9 +196,16 @@ const HINTS: readonly LgKeyHint[] = [
   imports: [
     ShowcaseStoryDirective,
     LgGameShellComponent,
-    LgNavRailComponent,
+    LgShellRailComponent,
+    LgShellTopComponent,
+    LgShellFolioComponent,
+    LgShellHintsComponent,
+    LgShellChronicleComponent,
+    ScNavRailComponent,
+    LgNavRailHeaderComponent,
     LgActivityComponent,
     LgTopBarComponent,
+    LgTopBarCenterComponent,
     LgObjectiveComponent,
     LgCurrencyPillComponent,
     ...LG_FOLIO,
@@ -204,7 +217,6 @@ const HINTS: readonly LgKeyHint[] = [
     ...LG_PANEL,
     ...LG_LIST,
     LgStageComponent,
-    LgSlotDirective,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -216,54 +228,65 @@ const HINTS: readonly LgKeyHint[] = [
       flush
     >
       <lg-game-shell height="42rem">
-        <lg-nav-rail lgSlot="rail" [sections]="nav" activeId="world-map">
-          <button
-            lgActivity
-            lgSlot="header"
-            label="Engaged in Combat"
-            remaining="00:12"
-            [progress]="0.42"
-          ></button>
-        </lg-nav-rail>
-        <lg-top-bar lgSlot="top" title="Aldric Vane" eyebrow="Lv. 42" showMenu>
-          <lg-objective
-            lgSlot="center"
-            kicker="Quest"
-            title="The First Hunt"
-            objective="Defeat wolves in the Whispering Woods"
-            [current]="3"
-            [required]="5"
+        <lg-shell-rail>
+          <sc-nav-rail [sections]="nav" current="world-map">
+            <lg-nav-rail-header>
+              <button
+                lgActivity
+                label="Engaged in Combat"
+                remaining="00:12"
+                [progress]="0.42"
+              ></button>
+            </lg-nav-rail-header>
+          </sc-nav-rail>
+        </lg-shell-rail>
+        <lg-shell-top>
+          <lg-top-bar heading="Aldric Vane" eyebrow="Lv. 42" showMenu>
+            <lg-top-bar-center>
+              <lg-objective
+                kicker="Quest"
+                heading="The First Hunt"
+                objective="Defeat wolves in the Whispering Woods"
+                [current]="3"
+                [required]="5"
+              />
+            </lg-top-bar-center>
+            <button
+              lgCurrencyPill
+              name="Cinders"
+              [amount]="12480"
+              iconSrc="assets/game-emblems/cinders-v1-64.webp"
+              short
+              toggle
+            ></button>
+            <span
+              lgCurrencyPill
+              name="Soulstones"
+              [amount]="36"
+              iconSrc="assets/game-emblems/soulstones-v1-64.webp"
+            ></span>
+          </lg-top-bar>
+        </lg-shell-top>
+        <lg-shell-folio>
+          <lg-folio eyebrow="Region" heading="Shenic">
+            <lg-folio-lore
+              >Temples older than the roads that lead to them.</lg-folio-lore
+            >
+            <lg-folio-actions>
+              <button lgButton hotkey="↵">Travel</button>
+            </lg-folio-actions>
+          </lg-folio>
+        </lg-shell-folio>
+        <lg-shell-hints>
+          <lg-key-hints [hints]="hints" />
+        </lg-shell-hints>
+        <lg-shell-chronicle>
+          <lg-chronicle
+            [channels]="channels"
+            [messages]="messages"
+            [composer]="false"
           />
-          <button
-            lgCurrencyPill
-            name="Cinders"
-            [amount]="12480"
-            iconSrc="assets/game-emblems/cinders-v1-64.webp"
-            short
-            toggle
-          ></button>
-          <span
-            lgCurrencyPill
-            name="Soulstones"
-            [amount]="36"
-            iconSrc="assets/game-emblems/soulstones-v1-64.webp"
-          ></span>
-        </lg-top-bar>
-        <lg-folio lgSlot="folio" eyebrow="Region" heading="Shenic">
-          <lg-folio-lore
-            >Temples older than the roads that lead to them.</lg-folio-lore
-          >
-          <lg-folio-actions>
-            <button lgButton hotkey="↵">Travel</button>
-          </lg-folio-actions>
-        </lg-folio>
-        <lg-key-hints lgSlot="hints" [hints]="hints" />
-        <lg-chronicle
-          lgSlot="chronicle"
-          [channels]="channels"
-          [messages]="messages"
-          [composer]="false"
-        />
+        </lg-shell-chronicle>
         <lg-page label="World Map">
           <lg-page-header
             heading="World Map"
@@ -303,32 +326,41 @@ const HINTS: readonly LgKeyHint[] = [
         chatLayout="floating"
         [(chroniclePosition)]="floatPosition"
       >
-        <lg-nav-rail lgSlot="rail" [sections]="nav" activeId="world-map" />
-        <lg-top-bar lgSlot="top" title="World Map" eyebrow="Shenic" showMenu>
-          <button
-            lgCurrencyPill
-            name="Cinders"
-            [amount]="12480"
-            iconSrc="assets/game-emblems/cinders-v1-64.webp"
-            short
-            toggle
-          ></button>
-        </lg-top-bar>
-        <lg-folio lgSlot="folio" eyebrow="Region" heading="Shenic">
-          <lg-folio-lore
-            >Temples older than the roads that lead to them.</lg-folio-lore
-          >
-          <lg-folio-actions>
-            <button lgButton hotkey="↵">Travel</button>
-          </lg-folio-actions>
-        </lg-folio>
-        <lg-key-hints lgSlot="hints" [hints]="hints" />
-        <lg-chronicle
-          lgSlot="chronicle"
-          [channels]="channels"
-          [messages]="messages"
-          [composer]="false"
-        />
+        <lg-shell-rail>
+          <sc-nav-rail [sections]="nav" current="world-map" />
+        </lg-shell-rail>
+        <lg-shell-top>
+          <lg-top-bar heading="World Map" eyebrow="Shenic" showMenu>
+            <button
+              lgCurrencyPill
+              name="Cinders"
+              [amount]="12480"
+              iconSrc="assets/game-emblems/cinders-v1-64.webp"
+              short
+              toggle
+            ></button>
+          </lg-top-bar>
+        </lg-shell-top>
+        <lg-shell-folio>
+          <lg-folio eyebrow="Region" heading="Shenic">
+            <lg-folio-lore
+              >Temples older than the roads that lead to them.</lg-folio-lore
+            >
+            <lg-folio-actions>
+              <button lgButton hotkey="↵">Travel</button>
+            </lg-folio-actions>
+          </lg-folio>
+        </lg-shell-folio>
+        <lg-shell-hints>
+          <lg-key-hints [hints]="hints" />
+        </lg-shell-hints>
+        <lg-shell-chronicle>
+          <lg-chronicle
+            [channels]="channels"
+            [messages]="messages"
+            [composer]="false"
+          />
+        </lg-shell-chronicle>
         <lg-stage
           image="assets/backgrounds/optimized/temple.webp"
           label="World Map"
@@ -344,30 +376,35 @@ const HINTS: readonly LgKeyHint[] = [
       flush
     >
       <lg-game-shell height="42rem">
-        <lg-nav-rail lgSlot="rail" [sections]="nav" activeId="world-map" />
-        <lg-top-bar lgSlot="top" title="Aldric Vane" eyebrow="Lv. 42">
-          <button
-            lgCurrencyPill
-            name="Cinders"
-            [amount]="12480"
-            iconSrc="assets/game-emblems/cinders-v1-64.webp"
-            short
-            toggle
-          ></button>
-          <span
-            lgCurrencyPill
-            name="Soulstones"
-            [amount]="36"
-            iconSrc="assets/game-emblems/soulstones-v1-64.webp"
-          ></span>
-        </lg-top-bar>
-        <lg-chronicle
-          lgSlot="chronicle"
-          [channels]="channels"
-          [messages]="messages"
-          [(open)]="chatOpen"
-          [composer]="false"
-        />
+        <lg-shell-rail>
+          <sc-nav-rail [sections]="nav" current="world-map" />
+        </lg-shell-rail>
+        <lg-shell-top>
+          <lg-top-bar heading="Aldric Vane" eyebrow="Lv. 42">
+            <button
+              lgCurrencyPill
+              name="Cinders"
+              [amount]="12480"
+              iconSrc="assets/game-emblems/cinders-v1-64.webp"
+              short
+              toggle
+            ></button>
+            <span
+              lgCurrencyPill
+              name="Soulstones"
+              [amount]="36"
+              iconSrc="assets/game-emblems/soulstones-v1-64.webp"
+            ></span>
+          </lg-top-bar>
+        </lg-shell-top>
+        <lg-shell-chronicle>
+          <lg-chronicle
+            [channels]="channels"
+            [messages]="messages"
+            [(open)]="chatOpen"
+            [composer]="false"
+          />
+        </lg-shell-chronicle>
         <lg-page label="World Map">
           <lg-page-header
             heading="World Map"
@@ -406,45 +443,52 @@ const HINTS: readonly LgKeyHint[] = [
         height="42rem"
         backdrop="assets/backgrounds/optimized/background.webp"
       >
-        <lg-nav-rail lgSlot="rail" [sections]="nav" activeId="world-map">
-          <button
-            lgActivity
-            lgSlot="header"
-            label="Engaged in Combat"
-            remaining="00:12"
-            [progress]="0.42"
-          ></button>
-        </lg-nav-rail>
-        <lg-top-bar lgSlot="top" title="Aldric Vane" eyebrow="Lv. 42" showMenu>
-          <lg-objective
-            lgSlot="center"
-            kicker="Quest"
-            title="The First Hunt"
-            objective="Defeat wolves in the Whispering Woods"
-            [current]="3"
-            [required]="5"
+        <lg-shell-rail>
+          <sc-nav-rail [sections]="nav" current="world-map">
+            <lg-nav-rail-header>
+              <button
+                lgActivity
+                label="Engaged in Combat"
+                remaining="00:12"
+                [progress]="0.42"
+              ></button>
+            </lg-nav-rail-header>
+          </sc-nav-rail>
+        </lg-shell-rail>
+        <lg-shell-top>
+          <lg-top-bar heading="Aldric Vane" eyebrow="Lv. 42" showMenu>
+            <lg-top-bar-center>
+              <lg-objective
+                kicker="Quest"
+                heading="The First Hunt"
+                objective="Defeat wolves in the Whispering Woods"
+                [current]="3"
+                [required]="5"
+              />
+            </lg-top-bar-center>
+            <button
+              lgCurrencyPill
+              name="Cinders"
+              [amount]="12480"
+              iconSrc="assets/game-emblems/cinders-v1-64.webp"
+              short
+              toggle
+            ></button>
+            <span
+              lgCurrencyPill
+              name="Soulstones"
+              [amount]="36"
+              iconSrc="assets/game-emblems/soulstones-v1-64.webp"
+            ></span>
+          </lg-top-bar>
+        </lg-shell-top>
+        <lg-shell-chronicle>
+          <lg-chronicle
+            [channels]="channels"
+            [messages]="messages"
+            [composer]="false"
           />
-          <button
-            lgCurrencyPill
-            name="Cinders"
-            [amount]="12480"
-            iconSrc="assets/game-emblems/cinders-v1-64.webp"
-            short
-            toggle
-          ></button>
-          <span
-            lgCurrencyPill
-            name="Soulstones"
-            [amount]="36"
-            iconSrc="assets/game-emblems/soulstones-v1-64.webp"
-          ></span>
-        </lg-top-bar>
-        <lg-chronicle
-          lgSlot="chronicle"
-          [channels]="channels"
-          [messages]="messages"
-          [composer]="false"
-        />
+        </lg-shell-chronicle>
         <lg-page label="World Map">
           <lg-page-header
             heading="World Map"
@@ -483,53 +527,56 @@ const HINTS: readonly LgKeyHint[] = [
         height="42rem"
         backdrop="assets/backgrounds/optimized/background.webp"
       >
-        <lg-nav-rail
-          lgSlot="rail"
-          [sections]="nav"
-          activeId="world-map"
-          compact
-        >
-          <button
-            lgActivity
-            lgSlot="header"
-            label="Engaged in Combat"
-            short="Battling"
-            remaining="00:12"
-            [progress]="0.42"
-            openLabel=""
-            compact
-          ></button>
-        </lg-nav-rail>
-        <lg-top-bar lgSlot="top" title="Aldric Vane" eyebrow="Lv. 42" showMenu>
-          <button
-            lgCurrencyPill
-            name="Cinders"
-            [amount]="12480"
-            iconSrc="assets/game-emblems/cinders-v1-64.webp"
-            short
-            toggle
-          ></button>
-          <span
-            lgCurrencyPill
-            name="Soulstones"
-            [amount]="36"
-            iconSrc="assets/game-emblems/soulstones-v1-64.webp"
-          ></span>
-        </lg-top-bar>
-        <lg-folio lgSlot="folio" eyebrow="Region" heading="Shenic">
-          <lg-folio-lore
-            >Temples older than the roads that lead to them.</lg-folio-lore
-          >
-          <lg-folio-actions>
-            <button lgButton hotkey="↵">Travel</button>
-          </lg-folio-actions>
-        </lg-folio>
-        <lg-chronicle
-          lgSlot="chronicle"
-          [channels]="channels"
-          [messages]="messages"
-          [composer]="false"
-        />
+        <lg-shell-rail>
+          <sc-nav-rail [sections]="nav" current="world-map" compact>
+            <lg-nav-rail-header>
+              <button
+                lgActivity
+                label="Engaged in Combat"
+                short="Battling"
+                remaining="00:12"
+                [progress]="0.42"
+                openLabel=""
+                compact
+              ></button>
+            </lg-nav-rail-header>
+          </sc-nav-rail>
+        </lg-shell-rail>
+        <lg-shell-top>
+          <lg-top-bar heading="Aldric Vane" eyebrow="Lv. 42" showMenu>
+            <button
+              lgCurrencyPill
+              name="Cinders"
+              [amount]="12480"
+              iconSrc="assets/game-emblems/cinders-v1-64.webp"
+              short
+              toggle
+            ></button>
+            <span
+              lgCurrencyPill
+              name="Soulstones"
+              [amount]="36"
+              iconSrc="assets/game-emblems/soulstones-v1-64.webp"
+            ></span>
+          </lg-top-bar>
+        </lg-shell-top>
+        <lg-shell-folio>
+          <lg-folio eyebrow="Region" heading="Shenic">
+            <lg-folio-lore
+              >Temples older than the roads that lead to them.</lg-folio-lore
+            >
+            <lg-folio-actions>
+              <button lgButton hotkey="↵">Travel</button>
+            </lg-folio-actions>
+          </lg-folio>
+        </lg-shell-folio>
+        <lg-shell-chronicle>
+          <lg-chronicle
+            [channels]="channels"
+            [messages]="messages"
+            [composer]="false"
+          />
+        </lg-shell-chronicle>
         <lg-page label="World Map">
           <lg-page-header
             heading="World Map"
@@ -565,25 +612,30 @@ const HINTS: readonly LgKeyHint[] = [
       flush
     >
       <lg-game-shell height="42rem">
-        <lg-nav-rail lgSlot="rail" [sections]="nav" activeId="world-map" />
-        <lg-top-bar lgSlot="top" title="Aldric Vane" eyebrow="Lv. 42" showMenu>
-          <lg-objective
-            lgSlot="center"
-            kicker="Quest"
-            title="The First Hunt"
-            objective="Defeat wolves in the Whispering Woods"
-            [current]="3"
-            [required]="5"
-          />
-          <button
-            lgCurrencyPill
-            name="Cinders"
-            [amount]="12480"
-            iconSrc="assets/game-emblems/cinders-v1-64.webp"
-            short
-            toggle
-          ></button>
-        </lg-top-bar>
+        <lg-shell-rail>
+          <sc-nav-rail [sections]="nav" current="world-map" />
+        </lg-shell-rail>
+        <lg-shell-top>
+          <lg-top-bar heading="Aldric Vane" eyebrow="Lv. 42" showMenu>
+            <lg-top-bar-center>
+              <lg-objective
+                kicker="Quest"
+                heading="The First Hunt"
+                objective="Defeat wolves in the Whispering Woods"
+                [current]="3"
+                [required]="5"
+              />
+            </lg-top-bar-center>
+            <button
+              lgCurrencyPill
+              name="Cinders"
+              [amount]="12480"
+              iconSrc="assets/game-emblems/cinders-v1-64.webp"
+              short
+              toggle
+            ></button>
+          </lg-top-bar>
+        </lg-shell-top>
         <lg-page label="World Map">
           <lg-page-header
             heading="World Map"
@@ -626,7 +678,14 @@ export const GAME_SHELL_SHOWCASE: ShowcaseEntry = {
   name: 'GameShell',
   tier: 'shell',
   summary: 'The screen frame.',
-  covers: ['LgGameShellComponent'],
+  covers: [
+    'LgGameShellComponent',
+    'LgShellRailComponent',
+    'LgShellTopComponent',
+    'LgShellFolioComponent',
+    'LgShellHintsComponent',
+    'LgShellChronicleComponent',
+  ],
   readme: 'src/app/grimoire/shell/game-shell/README.md',
   component: GameShellShowcaseComponent,
 };

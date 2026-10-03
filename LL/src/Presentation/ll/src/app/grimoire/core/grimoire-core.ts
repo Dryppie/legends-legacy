@@ -1,21 +1,4 @@
-import { Directive, InjectionToken, Signal, input } from '@angular/core';
-
-/**
- * Marks projected content for a named slot of a Grimoire component:
- * `<div lgSlot="aside">…</div>`. Import it next to the component so the
- * component can tell which slots are filled.
- */
-@Directive({ selector: '[lgSlot]' })
-export class LgSlotDirective {
-  readonly lgSlot = input.required<string>();
-}
-
-export function lgHasSlot(
-  slots: readonly LgSlotDirective[],
-  name: string,
-): boolean {
-  return slots.some((slot) => slot.lgSlot() === name);
-}
+import { InjectionToken, Signal } from '@angular/core';
 
 /** Joins class names, skipping empty ones: lgCx('lg-btn', blocked && 'is-blocked'). */
 export function lgCx(...names: (string | false | null | undefined)[]): string {

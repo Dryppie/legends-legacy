@@ -1,0 +1,22 @@
+/* ---------- Menu (D-146) ----------
+   A Level 2 float (Foundations · Surfaces & Layering): surface-raised, a line-strong hairline, radius-float,
+   shadow-float, its items in a column at space-1 from its edge. On its trigger's overlay it moves space-1 into place
+   over duration-fast (Foundations · Motion); in place (an inline menu) it stands still. No ornament. */
+:host {
+  display: flex; flex-direction: column; box-sizing: border-box; min-width: 10rem; max-width: min(20rem, calc(100vw - 1rem));
+  max-height: 70vh; overflow-y: auto; padding: var(--lg-space-1);
+  border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-float);
+  background: var(--lg-surface-raised); box-shadow: var(--lg-shadow-float);
+  color: var(--lg-ink); font-family: var(--lg-font-ui);
+}
+:host(:not(.cdk-menu-inline)) { animation: lg-enter var(--lg-duration-fast) var(--lg-ease-enter) both; --lg-enter-y: calc(-1 * var(--lg-space-1)); }
+:host(:focus) { outline: none; }
+/* Its head: what it acts on, in label capitals, ink-muted. For the eye: the menu's name says it to screen readers. */
+.lg-menu__heading {
+  padding: var(--lg-space-1) var(--lg-space-3) var(--lg-space-1);
+  font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps);
+  text-transform: uppercase; color: var(--lg-ink-muted);
+}
+@media (forced-colors: active) {
+  :host { border-color: CanvasText; }
+}

@@ -1,0 +1,22 @@
+/* ---------- Dialog (D-145) ----------
+   The sheet: Level 3 — folio, shadow-panel, a line-strong hairline, radius-container (Foundations · Surfaces &
+   Layering) — Comfortable, its regions in a column. It keeps a 16px margin to the window's sides and 24px to its top
+   and foot; the content scrolls inside when it is taller. On the overlay it rises in over duration-base on ease-enter
+   (a sheet arriving, Foundations · Motion); drawn in place (a story, a test) it stands still. No ornament: an everyday
+   dialog takes none (Principles · Anti-generic guardrails). */
+:host {
+  --lg-dialog-width: 32rem;
+  display: flex; flex-direction: column; box-sizing: border-box; min-height: 0; overflow: hidden;
+  width: min(var(--lg-dialog-width), calc(100vw - 2 * var(--lg-space-4)));
+  max-height: calc(100vh - 2 * var(--lg-space-6));
+  border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-container);
+  background: var(--lg-folio); box-shadow: var(--lg-shadow-panel);
+  color: var(--lg-ink); font-family: var(--lg-font-ui); font-size: var(--lg-text-body); line-height: var(--lg-leading-body);
+  text-align: start;
+}
+:host(.lg-dialog--sm) { --lg-dialog-width: 24rem; }
+:host(.lg-dialog--lg) { --lg-dialog-width: 44rem; }
+:host-context(.lg-dialog-pane) { animation: lg-enter var(--lg-duration-base) var(--lg-ease-enter) both; }
+@media (forced-colors: active) {
+  :host { border-color: CanvasText; }
+}

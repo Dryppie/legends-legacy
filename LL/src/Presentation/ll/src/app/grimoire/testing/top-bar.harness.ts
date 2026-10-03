@@ -6,7 +6,8 @@ export class LgTopBarHarness extends ComponentHarness {
 
   private readonly menu = this.locatorForOptional('.lg-topbar__menu');
 
-  async getTitle(): Promise<string> {
+  /** The character's name: its `heading`. */
+  async getHeading(): Promise<string> {
     return (await this.locatorFor('.lg-topbar__name')()).text();
   }
 

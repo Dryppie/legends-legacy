@@ -66,7 +66,7 @@ describe('LgPageHeaderComponent', () => {
     const icon = q('.lg-pagehead__icon');
     expect(icon.getAttribute('aria-hidden')).toBe('true');
     expect(icon.querySelector('polygon')).not.toBeNull();
-    const glyph = q<SVGElement>('.lg-pagehead__glyph svg.lg-icon');
+    const glyph = q<HTMLElement>('.lg-pagehead__glyph lg-icon');
     expect(getComputedStyle(glyph).width).toBe('24px');
     expect(getComputedStyle(icon).width).toBe('52px');
   });
@@ -98,7 +98,7 @@ describe('LgPageHeaderComponent', () => {
     expect(getComputedStyle(q('.lg-pagehead__eyebrow')).display).toBe('none');
     expect(getComputedStyle(q('.lg-pagehead__summary')).display).toBe('none');
     expect(getComputedStyle(q('.lg-pagehead__icon')).width).toBe('36px');
-    expect(getComputedStyle(q('.lg-pagehead__glyph svg.lg-icon')).width).toBe(
+    expect(getComputedStyle(q('.lg-pagehead__glyph lg-icon')).width).toBe(
       '18px',
     );
     expect(getComputedStyle(q('h1')).fontSize).toBe('24px');

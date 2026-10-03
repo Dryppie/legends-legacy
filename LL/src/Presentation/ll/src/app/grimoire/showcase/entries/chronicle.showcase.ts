@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import {
+  LgChronicleAsideComponent,
   LgChronicleChannel,
   LgChronicleComponent,
+  LgChronicleComposerComponent,
   LgChronicleMessage,
-  LgChronicleTextDirective,
+  LgChronicleMessageDirective,
   LgItemLinkComponent,
   LgKeyComponent,
   LgRarity,
-  LgSlotDirective,
 } from '@grimoire';
 import {
   ShowcaseEntryComponent,
@@ -246,10 +247,11 @@ const RICH_PARTS: Record<string, readonly RichPart[]> = {
   imports: [
     ShowcaseStoryDirective,
     LgChronicleComponent,
-    LgChronicleTextDirective,
+    LgChronicleMessageDirective,
+    LgChronicleAsideComponent,
+    LgChronicleComposerComponent,
     LgItemLinkComponent,
     LgKeyComponent,
-    LgSlotDirective,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -339,7 +341,7 @@ const RICH_PARTS: Record<string, readonly RichPart[]> = {
 
     <ng-template
       scStory="Custom text"
-      notes="An ng-template lgChronicleText draws each line's text: item links in their rarity colour, the @mention in bold."
+      notes="An ng-template lgChronicleMessage draws each line's text: item links in their rarity colour, the @mention in bold."
       width="24rem"
       height="20rem"
       flush
@@ -353,7 +355,7 @@ const RICH_PARTS: Record<string, readonly RichPart[]> = {
       >
         <!-- Whitespace between these parts is rendered, so Prettier must leave them on one line. -->
         <!-- prettier-ignore -->
-        <ng-template lgChronicleText let-message
+        <ng-template lgChronicleMessage let-message
           >@for (part of parts(message); track $index) {@if (part.item) {<button lgItemLink [rarity]="part.rarity">{{
               part.item
             }}</button>} @else if (part.mention) {<span class="lg-mention">{{ part.mention }}</span>} @else {{{ part.text }}}}</ng-template
@@ -374,7 +376,7 @@ const RICH_PARTS: Record<string, readonly RichPart[]> = {
         activeChannel="guild"
         [toggleable]="false"
       >
-        <div lgSlot="composer">
+        <lg-chronicle-composer>
           <div class="lg-chronicle__row">
             <span class="lg-chronicle__prefix lg-ch--guild">Guild</span>
             <div
@@ -385,13 +387,13 @@ const RICH_PARTS: Record<string, readonly RichPart[]> = {
               data-placeholder="Say something — @ to mention a player"
             ></div>
             <button type="button" class="lg-chronicle__send" aria-label="Send">
-              <lg-key>↵</lg-key>
+              <kbd lgKey>↵</kbd>
             </button>
           </div>
           <p class="lg-chronicle__note">
             Guild chat is seen by your guild only.
           </p>
-        </div>
+        </lg-chronicle-composer>
       </lg-chronicle>
     </ng-template>
 
@@ -407,30 +409,32 @@ const RICH_PARTS: Record<string, readonly RichPart[]> = {
         [messages]="allMessages"
         [composer]="false"
       >
-        <div lgSlot="aside" class="sc-row">
-          <span class="lg-chronicle__online">128 online</span>
-          <button
-            type="button"
-            class="lg-chronicle__toggle"
-            aria-label="Choose visible chat channels"
-            title="Choose visible channels"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="16"
-              height="16"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              aria-hidden="true"
+        <lg-chronicle-aside>
+          <div class="sc-row">
+            <span class="lg-chronicle__online">128 online</span>
+            <button
+              type="button"
+              class="lg-chronicle__toggle"
+              aria-label="Choose visible chat channels"
+              title="Choose visible channels"
             >
-              <path d="M4 7h10M18 7h2M4 17h2M10 17h10" />
-              <circle cx="16" cy="7" r="2" />
-              <circle cx="8" cy="17" r="2" />
-            </svg>
-          </button>
-        </div>
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                aria-hidden="true"
+              >
+                <path d="M4 7h10M18 7h2M4 17h2M10 17h10" />
+                <circle cx="16" cy="7" r="2" />
+                <circle cx="8" cy="17" r="2" />
+              </svg>
+            </button>
+          </div>
+        </lg-chronicle-aside>
       </lg-chronicle>
     </ng-template>
 
@@ -503,7 +507,12 @@ export const CHRONICLE_SHOWCASE: ShowcaseEntry = {
   name: 'Chronicle',
   tier: 'shell',
   summary: 'Chat and the game log.',
-  covers: ['LgChronicleComponent', 'LgChronicleTextDirective'],
+  covers: [
+    'LgChronicleComponent',
+    'LgChronicleMessageDirective',
+    'LgChronicleAsideComponent',
+    'LgChronicleComposerComponent',
+  ],
   readme: 'src/app/grimoire/shell/chronicle/README.md',
   component: ChronicleShowcaseComponent,
 };

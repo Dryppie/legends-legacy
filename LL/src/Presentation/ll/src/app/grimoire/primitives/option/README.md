@@ -4,7 +4,7 @@ An option in a list that keeps focus in its field.
 
 **Status:** Draft
 
-One row of a suggestions list — a SearchField's, and a Select's when it is built (plan step 22). The field keeps focus and moves a highlight through the options (`aria-activedescendant`); the highlighted option is `aria-selected`.
+One row of a list that keeps focus in its field — a SearchField's suggestions, a Select's options (D-146). The field keeps focus and moves a highlight through the options (`aria-activedescendant`); the highlighted option is `aria-selected`.
 
 **Provide:** `value` (what choosing it gives the field) and its words as content; `disabled` to show it but pass over it. It reports to the list it sits in through `LgOptionParent`, so it works only inside one.
 
@@ -17,6 +17,7 @@ One row of a suggestions list — a SearchField's, and a Select's when it is bui
 ```
 
 - A row on `radius-container`, `body-compact` words; the highlighted option takes `gilt-soft`, the old hover wash, queued in Governance · Audit & consolidation map with the rest of SearchField's colours. A disabled option is `ink-disabled`.
+- In a Select, the current choice is Selected: a 2px `arcana-glow` bar at its start and weight 600 (`LgOptionParent.isChosen`).
 - A press keeps focus in the field (the option takes no focus); the highlight follows the pointer.
 - The highlighted option scrolls into view.
 

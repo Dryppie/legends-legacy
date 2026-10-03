@@ -120,7 +120,7 @@ A container inside another surface takes the inner inset of the density it sits 
 | Meter, Sigil, LevelPlate, StatFigure, Banner, JourneyCard, Tag, CurrencyPill, KeyHints, TopBar, NavRail | One size | One size | One size | Fixed. NavRail's `compact` means collapsed to icons, not a density |
 | ItemSlot | Sizes | Sizes | Sizes | `sm`, `md` and `wide` are sizes for positional slots, not densities |
 
-The future Table reads the same row, cell and control values.
+The Table (`table[lgTable]`, D-146) reads the same row, cell and control values.
 
 ## Page archetypes and their densities
 

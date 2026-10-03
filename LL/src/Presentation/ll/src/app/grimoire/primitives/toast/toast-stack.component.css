@@ -1,0 +1,8 @@
+/* ---------- The toast stack (D-145) ----------
+   Toasts at the top centre of the stage, newest on top, space-2 apart, as wide as a toast's words need up to 24rem.
+   Each rises in over duration-base on ease-enter, as anything arriving in place does, and fades out over duration-fast
+   on ease-exit (Foundations · Motion); under reduced motion both happen at once. */
+:host { display: flex; flex-direction: column; gap: var(--lg-space-2); width: min(24rem, calc(100vw - 2 * var(--lg-space-4))); }
+@keyframes lg-toast-leave { to { opacity: 0; } }
+lg-toast { animation: lg-enter var(--lg-duration-base) var(--lg-ease-enter) both; }
+lg-toast.is-leaving { animation: lg-toast-leave var(--lg-duration-fast) var(--lg-ease-exit) forwards; pointer-events: none; }

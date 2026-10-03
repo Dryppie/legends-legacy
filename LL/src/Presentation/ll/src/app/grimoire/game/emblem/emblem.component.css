@@ -1,6 +1,7 @@
 /* ---------- Emblem ---------- */
-.lg-emblem { display: block; overflow: visible; color: var(--lg-emblem-ink); }
-.lg-emblem * { fill: none; stroke: currentColor; vector-effect: non-scaling-stroke; }
+:host { display: block; color: var(--lg-emblem-ink); }
+svg { display: block; width: 100%; height: 100%; overflow: visible; }
+svg * { fill: none; stroke: currentColor; vector-effect: non-scaling-stroke; }
 .lg-emblem__ring { stroke-width: 1.4; opacity: 0.9; }
 .lg-emblem__ring--thin { stroke-width: 0.8; opacity: 0.6; }
 .lg-emblem__spoke { stroke-width: 0.7; opacity: 0.45; }
@@ -8,4 +9,5 @@
 .lg-emblem__star { stroke-width: 1.6; }
 .lg-emblem__inner { stroke-width: 1; opacity: 0.8; }
 .lg-emblem__core { stroke-width: 1.2; }
-.lg-emblem__heart, .lg-emblem__dot { fill: currentColor; stroke: none; }
+/* Solid marks: scoped under the svg so they outrank its line rule above. */
+svg .lg-emblem__heart, svg .lg-emblem__dot { fill: currentColor; stroke: none; }

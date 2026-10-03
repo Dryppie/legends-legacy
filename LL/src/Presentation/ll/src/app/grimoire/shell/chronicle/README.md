@@ -6,7 +6,15 @@ Chat and the game log.
 
 The Chronicle is the game's chat and log in one place: what people say (General, Trade, Help, Guild, Whispers, Raid) and what happens to you (System lines, Loot).
 
-**Provide:** `channels` (`[{ id, label, unread? }]` — an `all` id shows the merged feed of visible channels), `[(activeChannel)]`, `messages` (`[{ id, channel, channelLabel, time, author?, direction?: 'from' | 'to', kind?: 'chat' | 'system' | 'loot', mention?, text }]` — `text` is a string; render ItemLinks and a `.lg-mention` span in it with an `<ng-template lgChronicleText let-message>`), `[(open)]`, and for the built-in composer `composerChannel`, `composerChannelLabel`, `[(draft)]`, `(send)` and an optional `placeholder`. Put channel settings (the visible-channels picker) in the `aside` slot. Channel commands (/g, /w) and mention suggestions stay in your composer logic.
+**Provide:** `channels` (`[{ id, label, unread? }]` — an `all` id shows the merged feed of visible channels), `[(activeChannel)]`, `messages` (`[{ id, channel, channelLabel, time, author?, direction?: 'from' | 'to', kind?: 'chat' | 'system' | 'loot', mention?, text }]` — `text` is a string; render ItemLinks and a `.lg-mention` span in it with an `<ng-template lgChronicleMessage let-message>`, whose `message` is typed), `[(open)]`, and for the built-in composer `composerChannel`, `composerChannelLabel`, `[(draft)]`, `(send)` and an optional `placeholder`. Put channel settings (the visible-channels picker) in an `lg-chronicle-aside`. Channel commands (/g, /w) and mention suggestions stay in your composer logic. Its host is the region (D-141); in a GameShell it goes in an `lg-shell-chronicle`, which places it and sets its `--lg-chronicle-*` properties for each place.
+
+```html
+<lg-chronicle [channels]="channels" [messages]="lines" [(activeChannel)]="active" label="Chat">
+  <ng-template lgChronicleMessage let-message>…</ng-template>
+  <lg-chronicle-aside>…</lg-chronicle-aside>
+  <lg-chronicle-composer>…</lg-chronicle-composer>
+</lg-chronicle>
+```
 
 **Where it goes** follows the player's chat-layout setting — pass it to GameShell as `chatLayout` and let the shell place it:
 - **Docked:** on the right side — its own column at 96rem (1536px) and wider, or under the Folio below that. Collapsed it becomes a vertical strip (when it owns a column) or a one-line ticker (when it sits under the Folio). The Chronicle picks the strip by itself whenever its container is under 7.5rem (120px) wide.
@@ -29,13 +37,13 @@ The Chronicle is the game's chat and log in one place: what people say (General,
 
 **Player actions and Nobility** (D-112). With `authorActions` each author's name is a button that emits `(authorSelect)` with `{ message, element }`; the host opens its own menu — View profile, Whisper — anchored to that element as a Level 2 popover. The collapsed ticker keeps plain names. A message with `noble` shows the 12px Nobility crown before the name, labelled "Noble", as Identity does (D-066).
 
-**A composer of your own** (D-112). Project a `lgSlot="composer"` child when the host needs more than the built-in input — the game's editor holds item links and offers @mention suggestions. It takes the composer's place and may use its parts:
+**A composer of your own** (D-112). Project an `lg-chronicle-composer` when the host needs more than the built-in input — the game's editor holds item links and offers @mention suggestions. It takes the composer's place while the Chronicle is open and may use its parts — global classes, since the Chronicle's own styles can't reach your content (`chronicle-parts.css`):
 
 - `lg-chronicle__row` lays out the prefix, the input and the send key; `lg-chronicle__input` styles an `<input>` or a contenteditable editor (its `data-placeholder` shows while empty);
 - `lg-chronicle__note` and `lg-chronicle__error` (with `role="alert"`) sit under the row; `lg-chronicle__count` shows the length as the limit nears, `is-over` past it;
 - `lg-chronicle__suggest` is the @mention list — a Level 2 floating `listbox` above the input with `lg-chronicle__option` options (`is-active` for the highlighted one: the raised wash and a 2px `ink` bar) and `lg-chronicle__status` for "Searching…" or "No players found". The input is its `combobox`: Up and Down move, Enter or Tab picks, Escape closes.
 
-**Channel settings** go in the `aside` slot: a quiet icon button opening `lg-chronicle__menu`, a Level 2 menu titled with `lg-chronicle__menu-title` and holding one `lg-chronicle__choice` per channel — a label around an `lg-check`, the native checkbox in `arcana-glow` (checked is selected). `lg-chronicle__online` beside it says how many players are online.
+**Channel settings** go in an `lg-chronicle-aside`, beside the channel tabs (it hides with the strip): a quiet icon button (`lg-chronicle__toggle`) that opens a Popover (`[lgPopoverTrigger]`) holding a Checkbox per channel (D-146). `lg-chronicle__online` beside it says how many players are online. An author's View Profile and Whisper are a Menu (`lg-menu`) the host opens from `authorSelect`.
 
 ## Accessibility notes
 

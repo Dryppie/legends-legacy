@@ -6,11 +6,11 @@ import {
 } from '@angular/cdk/testing';
 
 export interface LgObjectiveHarnessFilters extends BaseHarnessFilters {
-  /** The quest's title. */
-  title?: string | RegExp;
+  /** The quest's title: its heading. */
+  heading?: string | RegExp;
 }
 
-/** The pinned quest (lg-objective): its summary, and the tracker it opens when it has one. */
+/** The pinned quest (lg-objective): its summary, and the tracker it opens in a Popover when it has one. */
 export class LgObjectiveHarness extends ComponentHarness {
   static hostSelector = 'lg-objective';
 
@@ -18,17 +18,24 @@ export class LgObjectiveHarness extends ComponentHarness {
     options: LgObjectiveHarnessFilters = {},
   ): HarnessPredicate<LgObjectiveHarness> {
     return new HarnessPredicate(LgObjectiveHarness, options).addOption(
-      'title',
-      options.title,
-      (harness, title) =>
-        HarnessPredicate.stringMatches(harness.getTitle(), title),
+      'heading',
+      options.heading,
+      (harness, heading) =>
+        HarnessPredicate.stringMatches(harness.getHeading(), heading),
     );
   }
 
   private readonly summary = this.locatorFor('.lg-objective__summary');
-  private readonly panel = this.locatorForOptional('.lg-objective__panel');
 
-  async getTitle(): Promise<string> {
+  /** The tracker while it is open: a Popover on the CDK overlay, named by the summary's aria-controls. */
+  private async panel() {
+    const id = await (await this.summary()).getAttribute('aria-controls');
+    return id
+      ? this.documentRootLocatorFactory().locatorForOptional(`[id="${id}"]`)()
+      : null;
+  }
+
+  async getHeading(): Promise<string> {
     return (await this.locatorFor('.lg-objective__title')()).text();
   }
 
@@ -48,7 +55,7 @@ export class LgObjectiveHarness extends ComponentHarness {
     return (await this.summary()).matchesSelector('button');
   }
 
-  /** A pointer press on the summary: focus moves to it, then it is clicked. */
+  /** A pointer press on the summary: focus moves to it, then it is clicked (the tracker then takes focus). */
   async press(): Promise<void> {
     const summary = await this.summary();
     await summary.focus();
@@ -76,7 +83,7 @@ export class LgObjectiveHarness extends ComponentHarness {
     return (await this.summary()).isFocused();
   }
 
-  /** The tracker region's accessible name, or null while it is closed. */
+  /** The tracker's accessible name (a non-modal dialog), or null while it is closed. */
   async getPanelLabel(): Promise<string | null> {
     const panel = await this.panel();
     return panel ? panel.getAttribute('aria-label') : null;

@@ -215,6 +215,15 @@ for (const tier of PART_TIERS) {
   }
 }
 
+// 10. A part's host is its box, and its regions are child components (ANGULAR_DESIGN_SYSTEM_PLAN.md, section 8; D-143):
+//     no display: contents, no slot directive, and no `interactive` input standing in for a native button or link host.
+for (const p of grimoireFiles.filter((f) => /\.(ts|css)$/.test(f) && !f.endsWith('.spec.ts') && !f.includes(`${sep}showcase${sep}`))) {
+  const s = read(p);
+  for (const m of s.matchAll(/display:\s*contents|\blgSlot\b|\binteractive\s*=\s*input\b/g)) {
+    errors.push(`${rel(p)}:${lineOf(s, m.index)}: ${m[0]}. A part's host is its box and its regions are components (D-143).`);
+  }
+}
+
 for (const w of warnings) console.log(`warning  ${w}`);
 for (const e of errors) console.log(`ERROR    ${e}`);
 console.log(`\n${errors.length} error(s), ${warnings.length} warning(s).`);

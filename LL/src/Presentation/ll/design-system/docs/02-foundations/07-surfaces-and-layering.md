@@ -24,7 +24,7 @@ The two are separate. An item hover card looks like Level 2, but it sits on the 
 **Should**
 - Build surfaces from the level classes (`lg-level-1`, `lg-level-2`, `lg-level-3`, their `--float` variants and `lg-scrim`), or from the same tokens.
 - Open every popover, tooltip, menu, dialog and confirmation on the Angular CDK overlay (D-134), so no region or dialog clips it and it stacks in the order it opened.
-- Give anything else that Escape closes (the rail drawer, the Objective's tracker) the same manners: leave an Escape something above it already took (`defaultPrevented`) alone, and mark the Escape it takes.
+- Give anything else that Escape closes (the rail drawer) the same manners: leave an Escape something above it already took (`defaultPrevented`) alone, and mark the Escape it takes.
 - Show selection with a solid `border-emphasis` (2px) `arcana-glow` ring or edge — an `ink` bar in item rows and chat — and hover with the neutral `surface-raised` wash (D-015, Foundations · Lines).
 - Treat stage art the same way everywhere:
   - darkened, warmed and slightly blurred;
@@ -117,7 +117,7 @@ From the bottom up. A layer paints over every layer below it, whatever the level
 
 `z-overlay`, `z-popover`, `z-modal` and `z-popover-detached` keep the game's values. The other ten fill the gaps around them.
 
-**The CDK overlay (D-134).** Popovers, tooltips, menus, dialogs and confirmations open in the Angular CDK's overlay container, which sits above every layer in the page, the legacy screens' overlays included. Inside it they stack in the order they open: a popover opened from a dialog sits above that dialog, and a tooltip above whatever it opened from. So the tokens from `z-popover` up name an order the overlay keeps, not a z-index anything sets. The toast, the tour and a drag preview will lift their overlay above the rest with their token when they are built. Script reads the values from `LG_LAYER` in `tokens.ts`.
+**The CDK overlay (D-134).** Popovers, tooltips, menus, dialogs and confirmations open in the Angular CDK's overlay container, which sits above every layer in the page, the legacy screens' overlays included. Inside it they stack in the order they open: a popover opened from a dialog sits above that dialog, and a tooltip above whatever it opened from. So the tokens from `z-popover` up name an order the overlay keeps, not a z-index anything sets. The toast's layer lifts above the rest with its token (`overlay.css`, D-145); the tour and a drag preview will lift theirs when they are built. Script reads the values from `LG_LAYER` in `tokens.ts`.
 
 - **Layers compare at the top of the document.** The Stage, the Page (a size container), each region and each dialog start their own stacking context. Nothing drawn in place inside one can rise above the shell's layers outside it: an in-place tooltip in the Page stays under the TopBar and the Folio.
 - **A popover never draws in place:** it opens on the CDK overlay, so it passes over the shell's layers and is never clipped by the region or dialog it came from. The tip — a tooltip, a Ledger row's explanation, a blocked control's reason — is one float for the page, on the overlay.
@@ -155,14 +155,14 @@ From the bottom up. A layer paints over every layer below it, whatever the level
    | 6 | A page popover or menu | Closes it |
    | 7 | The rail drawer | Closes it |
 
-   Each layer stops the key there. The tip hears Escape before anything else. The CDK overlays hear it next, the latest opened first, and each marks the Escape it uses; the rail drawer and the Objective's tracker, which aren't overlays, leave a marked Escape alone. A toast takes Escape only while focus is in it. A screen may use Escape for Back only when no layer is open.
+   Each layer stops the key there. The tip hears Escape before anything else. The CDK overlays hear it next, the latest opened first, and each marks the Escape it uses; the rail drawer, which isn't an overlay, leaves a marked Escape alone. A toast takes Escape only while focus is in it. A screen may use Escape for Back only when no layer is open.
 4. **Focus goes into a layer, and back to where it came from.**
    - Opening a layer moves focus into it: a dialog to its first control, a confirmation to its safe button, the tour to its coach mark.
    - Popovers that open on hover or focus don't take focus.
    - A dialog, a confirmation and the tour trap Tab (`trap`), and everything beneath them is `inert`.
    - Closing a layer returns focus to the element that opened it. If that element is gone (the item was withdrawn), focus goes to the nearest thing that remains: the next row, or the dialog's heading.
 
-The Angular CDK implements these rules (D-134): its Overlay for popovers, tooltips and menus, its keyboard dispatcher for the order Escape takes, and `cdk/dialog` for the dialog and the confirmation (focus trap, focus return, Escape, `aria-modal`), which plan step 21 builds. The tip is `LgTip`, under `lgTooltip` and `lgBlocked`.
+The Angular CDK implements these rules (D-134): its Overlay for popovers (`lgPopoverTrigger`), tooltips, the Select's list and menus (`cdk/menu`, D-146), its keyboard dispatcher for the order Escape takes, and `cdk/dialog` for the dialog and the confirmation (focus trap, focus return, Escape, `aria-modal`), which `LgDialog` wraps (D-145); `LgToaster` places the toasts. The tip is `LgTip`, under `lgTooltip` and `lgBlocked`.
 
 ## In the game
 

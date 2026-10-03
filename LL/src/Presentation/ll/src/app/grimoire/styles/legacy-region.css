@@ -1,0 +1,11 @@
+/* ---------- The legacy region (D-108) ----------
+   Content inside the GameShell that isn't built with Grimoire — a screen that hasn't migrated yet. Grimoire's inherited
+   type and colour stop here; the host sets --lg-legacy-* to its own body values, and its own element styles restart
+   inside (they stop again at any .lg-root within). It fills the stage below the TopBar. Global: the host's own markup
+   carries the class. */
+.lg-legacy {
+  position: absolute; inset: 0; display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+  padding-top: var(--lg-topbar-height);
+  color: var(--lg-legacy-ink, inherit); font-family: var(--lg-legacy-font, inherit); font-size: var(--lg-legacy-size, inherit);
+  line-height: var(--lg-legacy-leading, inherit); font-weight: var(--lg-legacy-weight, inherit); font-variant-numeric: normal;
+}

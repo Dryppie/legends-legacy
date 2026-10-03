@@ -1,0 +1,44 @@
+/* ---------- Icon button (D-145) ----------
+   A square of the control height, a rectangle at radius-control (Foundations · Shape: never a circle), its icon in
+   ink-muted. Quiet: no edge; hover is the neutral surface-raised wash and the icon turns ink. Framed: the primary
+   Button's surface and line-strong edge, for a row of Buttons. Pressed (a toggle that is on) is Selected: an
+   arcana-glow edge inside, the icon ink. Blocked keeps it focusable on a line edge; Locked's edge is dashed. */
+:host {
+  display: inline-grid; place-items: center; flex: none; position: relative; isolation: isolate;
+  width: var(--lg-control); height: var(--lg-control); min-width: var(--lg-target-min); min-height: var(--lg-target-min);
+  padding: 0; border: var(--lg-border-hairline) solid transparent; border-radius: var(--lg-radius-control);
+  background: transparent; color: var(--lg-ink-muted); cursor: pointer; text-decoration: none;
+  transition: transform var(--lg-duration-fast) var(--lg-ease-standard);
+}
+/* The hover wash is a layer that fades (Foundations · Motion): only its opacity changes. */
+:host::after {
+  content: ""; position: absolute; inset: calc(-1 * var(--lg-border-hairline)); z-index: -1; pointer-events: none;
+  border-radius: inherit; background: var(--lg-surface-raised); opacity: 0;
+  transition: opacity var(--lg-duration-fast) var(--lg-ease-standard);
+}
+:host(:hover:not(:disabled, .is-blocked)) { color: var(--lg-ink); }
+:host(:hover:not(:disabled, .is-blocked))::after { opacity: 1; }
+:host(:active:not(:disabled, .is-blocked)) { transform: translateY(var(--lg-border-hairline)); transition-duration: var(--lg-duration-instant); }
+:host(:focus-visible) { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); }
+lg-icon { width: var(--lg-icon); height: var(--lg-icon); }
+
+:host(.lg-iconbtn--framed) { background: var(--lg-surface); border-color: var(--lg-line-strong); color: var(--lg-ink); }
+:host(.lg-iconbtn--framed)::after { background: none; border: var(--lg-border-hairline) solid var(--lg-gilt); }
+
+/* An explicit size pins it to one density, as the Button's. */
+:host(.lg-iconbtn--md) { --lg-control: var(--lg-control-standard); --lg-icon: var(--lg-icon-standard); }
+:host(.lg-iconbtn--sm) { --lg-control: var(--lg-control-compact); --lg-icon: var(--lg-icon-compact); }
+
+/* Pressed is Selected (Standards · States): the arcana-glow edge, drawn inside so the focus ring stays outside it. */
+:host(.is-pressed) { color: var(--lg-ink); box-shadow: inset 0 0 0 var(--lg-border-emphasis) var(--lg-arcana-glow); }
+:host(.is-pressed:focus-visible) { box-shadow: var(--lg-focus-ring), inset 0 0 0 var(--lg-border-emphasis) var(--lg-arcana-glow); }
+
+:host(:disabled) { color: var(--lg-ink-disabled); cursor: not-allowed; }
+:host(.lg-iconbtn--framed:disabled) { border-color: var(--lg-line); background: transparent; }
+:host(.is-blocked) { color: var(--lg-ink-muted); cursor: not-allowed; }
+:host(.lg-iconbtn--framed.is-blocked) { border-color: var(--lg-line); background: transparent; }
+:host(.lg-iconbtn--framed.is-locked) { border-style: dashed; }
+
+@media (forced-colors: active) {
+  :host(.is-pressed) { outline: 2px solid Highlight; outline-offset: -2px; }
+}

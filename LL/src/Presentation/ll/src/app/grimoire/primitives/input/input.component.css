@@ -1,0 +1,25 @@
+/* ---------- Input ----------
+   A well (Foundations · Surfaces & Layering): ground-deep with a line-strong edge (Foundations · Lines), at
+   radius-control, as tall as the region's controls. */
+:host {
+  box-sizing: border-box; width: 100%; min-width: 0;
+  height: var(--lg-control); margin: 0; padding: 0 var(--lg-space-4);
+  border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-control);
+  background: var(--lg-ground-deep); color: var(--lg-ink);
+  font-family: var(--lg-font-ui); font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact);
+}
+:host::placeholder { color: var(--lg-ink-muted); opacity: 1; }
+:host(:hover) { border-color: var(--lg-ink-muted); }
+:host(:focus-visible) { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); }
+/* Error: the edge turns danger, with the message under it (lg-field). */
+:host([aria-invalid='true']) { border-color: var(--lg-danger); }
+/* Disabled: the words and the edge step back. */
+:host(:disabled) { color: var(--lg-ink-disabled); border-color: var(--lg-line); cursor: not-allowed; }
+:host(:disabled)::placeholder { color: var(--lg-ink-disabled); }
+:host(:read-only:not(:disabled)) { background: transparent; }
+/* A textarea grows downward: at least two lines, resized only in height. */
+:host(.lg-input--area) {
+  height: auto; min-height: calc(var(--lg-control) * 2); padding-top: var(--lg-space-2); padding-bottom: var(--lg-space-2);
+  resize: vertical; white-space: pre-wrap; overflow-wrap: anywhere;
+}
+@media (forced-colors: active) { :host([aria-invalid='true']) { border-style: dashed; } }

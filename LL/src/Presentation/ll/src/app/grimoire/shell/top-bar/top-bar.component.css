@@ -1,9 +1,11 @@
 /* ---------- TopBar ---------- */
-.lg-topbar {
+/* Inside a GameShell its region (lg-shell-top) sets --lg-topbar-bg and --lg-topbar-rule over the frame's backdrop. */
+:host {
   display: flex; align-items: center; gap: var(--lg-space-5);
   min-height: var(--lg-topbar-height); padding: 0 var(--lg-space-5);
   container: lg-topbar / inline-size;
-  background: linear-gradient(to bottom, var(--lg-ground) 0%, color-mix(in srgb, var(--lg-ground) 72%, transparent) 70%, transparent);
+  background: var(--lg-topbar-bg, linear-gradient(to bottom, var(--lg-ground) 0%, color-mix(in srgb, var(--lg-ground) 72%, transparent) 70%, transparent));
+  border-bottom: var(--lg-topbar-rule, none);
 }
 .lg-topbar__menu {
   display: none; place-items: center; width: 2.25rem; height: 2.25rem; margin-left: calc(var(--lg-space-2) * -1);
@@ -12,22 +14,25 @@
 .lg-topbar__title { display: flex; align-items: baseline; gap: var(--lg-space-3); flex: 0 1 auto; min-width: min-content; max-width: 45%; }
 .lg-topbar__name { font-family: var(--lg-title-family); font-style: var(--lg-title-style); font-weight: var(--lg-title-weight); font-size: var(--lg-text-name-header); line-height: var(--lg-leading-name-header); letter-spacing: var(--lg-tracking-display); color: var(--lg-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lg-topbar__eyebrow { order: 2; font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-gilt); white-space: nowrap; }
-.lg-topbar__center { flex: 1 1 11.25rem; display: flex; justify-content: center; min-width: 0; container: lg-topcenter / inline-size; }
-.lg-topbar__center > * { width: 100%; max-width: 26.25rem; }
 .lg-topbar__end { display: flex; align-items: center; gap: var(--lg-space-2); margin-left: auto; }
-/* Larger text reflows the TopBar before anything overlaps: currency names give way to their art (the full name is still
-   read out and in the tooltip), then the centre Track loses its end labels. */
-@container lg-topbar (max-width: 40rem) {
-  .lg-topbar .lg-currency__name { display: none; }
-}
-@container lg-topcenter (max-width: 16rem) {
-  .lg-track__end { display: none; }
-}
 /* At the narrowest (400% zoom on a 1280px screen) the name truncates and the currency strip scrolls sideways inside
-   the TopBar, so the page itself never scrolls horizontally (WCAG 1.4.10). */
+   the TopBar, so the page itself never scrolls horizontally (WCAG 1.4.10). Larger text first reflows the TopBar's parts
+   themselves: currency names give way to their art (CurrencyPill), then the centre Track loses its end labels (Track). */
 @container lg-topbar (max-width: 30rem) {
-  .lg-topbar { gap: var(--lg-space-3); padding: 0 var(--lg-space-3); }
   .lg-topbar__title { flex: 1 1 auto; min-width: 0; max-width: none; }
   .lg-topbar__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .lg-topbar__end { flex: 0 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+}
+/* In a GameShell (D-115): its insets are the Page's gutter, so the title starts and the currencies end where the
+   screen's edges are; under 60rem the menu button shows, to open the rail drawer. */
+@container lg-shell (min-width: 60rem) {
+  :host { padding-inline: var(--lg-section-md); }
+}
+@container lg-shell (max-width: 59.9375rem) {
+  .lg-topbar__menu { display: grid; }
+}
+/* Under 40rem the "now" thing in the centre takes a second row (D-114): the rest keeps the first. */
+@container lg-shell (max-width: 40rem) {
+  :host(.has-center) { position: relative; align-items: flex-start; padding-top: calc((3.5rem - var(--lg-topbar-row, 2.25rem)) / 2); }
+  :host(.has-center) > :not(.lg-topbar__center) { min-height: var(--lg-topbar-row, 2.25rem); display: flex; align-items: center; }
 }

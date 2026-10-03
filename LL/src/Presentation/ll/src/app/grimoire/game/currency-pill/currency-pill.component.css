@@ -15,3 +15,7 @@
 .lg-currency__icon { display: block; width: 1.375rem; height: 1.375rem; object-fit: contain; } /* the emblems are tall shards: 22px keeps them legible in a 30px pill (D-126) */
 .lg-currency__amount { display: inline-block; font-family: var(--lg-font-numeral); font-size: var(--lg-text-numeral-row); font-weight: 600; font-variant-numeric: tabular-nums lining-nums; text-align: right; }
 .lg-currency__name { font-size: var(--lg-text-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ink-muted); }
+/* In a TopBar that larger text has narrowed, the name gives way to the art; it is still read out and in the tooltip. */
+@container lg-topbar (max-width: 40rem) {
+  .lg-currency__name { display: none; }
+}

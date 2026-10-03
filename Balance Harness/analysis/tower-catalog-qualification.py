@@ -131,10 +131,10 @@ def summons_acceptance(plan):
         return plan
     owner_module().check(plan.get('acceptedAggregate', {}).get('version') in
                          ('applied-tower-ni-restoration-aggregate-v1', 'applied-tower-mad-king-acceptance-aggregate-v1',
-                          'applied-tower-floor12-restoration-aggregate-v1') and
+                          'applied-tower-floor12-restoration-aggregate-v1', 'applied-tower-floor13-restoration-aggregate-v1') and
                          set(parent) == {'acceptedAggregate', 'receiptPins'} and
                          parent['acceptedAggregate'].get('version') == 'applied-tower-kodoku-midpoint-aggregate-v1',
-                         'Only the applied Ni/Mad King/floor-twelve-to-Kodoku summon acceptance chain is supported')
+                         'Only the applied Ni/Mad King/floor-twelve/floor-thirteen-to-Kodoku summon acceptance chain is supported')
     return parent
 
 
@@ -339,6 +339,40 @@ def validate_floor13_bound_family(proposal, original):
     return floor13_family_module().validate(proposal, original)
 
 
+
+def floor14_family_module():
+    spec = importlib.util.spec_from_file_location('floor14_bound_family', Path(__file__).with_name('tower-floor14-family-binding.py'))
+    value = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(value)
+    return value
+
+
+def validate_floor14_bound_family(proposal, original):
+    return floor14_family_module().validate(proposal, original)
+
+
+def floor13_restoration_module():
+    spec = importlib.util.spec_from_file_location('floor13_restoration_binding', Path(__file__).with_name('tower-floor13-restoration-binding.py'))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def validate_floor13_restoration_family(proposal, original):
+    return floor13_restoration_module().validate(proposal, original)
+
+
+def floor14_restoration_module():
+    spec = importlib.util.spec_from_file_location('floor14_restoration_binding', Path(__file__).with_name('tower-floor14-restoration-binding.py'))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def validate_floor14_restoration_family(proposal, original):
+    return floor14_restoration_module().validate(proposal, original)
+
+
 def validate_family(proposal, original):
     validators = {'floor6-partial-restoration-proposal-v1': validate_partial_family,
                   'floor2-mixed-armor-proposal-v1': validate_mixed_armor_family,
@@ -349,7 +383,10 @@ def validate_family(proposal, original):
                   'floor10-limited-armor-proposal-v1': validate_floor10_limited_armor_family,
                   'floor12-limited-resistance-bound-family-v1': validate_floor12_bound_family,
                   'floor12-limited-restoration-bound-family-v1': validate_floor12_restoration_family,
-                  'floor13-limited-defense-bound-family-v1': validate_floor13_bound_family}
+                  'floor13-limited-defense-bound-family-v1': validate_floor13_bound_family,
+                  'floor14-limited-defense-bound-family-v1': validate_floor14_bound_family,
+                  'floor13-limited-restoration-bound-family-v1': validate_floor13_restoration_family,
+                  'floor14-limited-restoration-bound-family-v1': validate_floor14_restoration_family}
     owner_module().check(proposal['version'] in validators, 'Unknown family proposal version')
     return validators[proposal['version']](proposal, original)
 
@@ -393,12 +430,18 @@ def admit_family(path, source, api, tests, input_pins=None):
     cells = validate_family(proposal, io.read(source/'cells.json'))
     if input_pins is not None and proposal['version'] in ('floor12-limited-resistance-bound-family-v1',
                                                         'floor12-limited-restoration-bound-family-v1',
-                                                        'floor13-limited-defense-bound-family-v1'):
+                                                        'floor13-limited-defense-bound-family-v1',
+                                                        'floor14-limited-defense-bound-family-v1',
+                                                        'floor13-limited-restoration-bound-family-v1',
+                                                        'floor14-limited-restoration-bound-family-v1'):
         # Keep the immutable historical proposal and qualification evidence bound
         # throughout seed-free native preparation, including derivation helpers.
         helpers = {'floor12-limited-restoration-bound-family-v1': floor12_restoration_module,
                    'floor12-limited-resistance-bound-family-v1': floor12_family_module,
-                   'floor13-limited-defense-bound-family-v1': floor13_family_module}
+                   'floor13-limited-defense-bound-family-v1': floor13_family_module,
+                   'floor14-limited-defense-bound-family-v1': floor14_family_module,
+                   'floor13-limited-restoration-bound-family-v1': floor13_restoration_module,
+                   'floor14-limited-restoration-bound-family-v1': floor14_restoration_module}
         helper = helpers[proposal['version']]()
         pins = helper.input_pins(proposal)
         pins.update({str(qualified/name): pin for name, pin in admission['qualificationPins'].items()})

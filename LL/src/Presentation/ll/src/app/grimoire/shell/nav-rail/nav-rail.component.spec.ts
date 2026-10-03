@@ -1,7 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed, fakeAsync, flush } from '@angular/core/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
-import { LgNavRailComponent, LgNavSection } from './nav-rail.component';
+import {
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  provideRouter,
+} from '@angular/router';
+import {
+  LgNavItemComponent,
+  LgNavRailComponent,
+  LgNavSectionComponent,
+} from './nav-rail.component';
 import { LgNavRailHarness } from '../../testing/nav-rail.harness';
 import { LgTipHarness, lgCloseTip } from '../../testing/tip.harness';
 import {
@@ -10,55 +20,74 @@ import {
   lgWatchAnnouncements,
 } from '../../testing/announcer';
 
+@Component({ template: '' })
+class EmptyPage {}
+
 @Component({
-  imports: [LgNavRailComponent],
+  imports: [
+    LgNavRailComponent,
+    LgNavSectionComponent,
+    LgNavItemComponent,
+    RouterLink,
+    RouterLinkActive,
+  ],
   template: `
     <div (click)="linkFollowed = !$event.defaultPrevented">
-      <lg-nav-rail
-        [sections]="sections"
-        activeId="overview"
-        (navigate)="navigations.push($event)"
-      />
+      <lg-nav-rail [compact]="compact()">
+        <lg-nav-section label="Character">
+          <a
+            lgNavItem
+            routerLink="/character/overview"
+            routerLinkActive
+            ariaCurrentWhenActive="page"
+            icon="overview"
+            (click)="pressed.push('overview')"
+            >Overview</a
+          >
+          <a
+            lgNavItem
+            routerLink="/character/inventory"
+            routerLinkActive
+            ariaCurrentWhenActive="page"
+            icon="inventory"
+            [badge]="3"
+            badgeLabel="3 new items"
+            (click)="pressed.push('inventory')"
+            >Inventory</a
+          >
+          <a
+            lgNavItem
+            locked
+            reason="Unlocks at level 20"
+            icon="essences"
+            (click)="pressed.push('essences')"
+            >Essences</a
+          >
+        </lg-nav-section>
+        <lg-nav-section label="City">
+          <a lgNavItem href="/guild" icon="guild">Guild</a>
+        </lg-nav-section>
+      </lg-nav-rail>
     </div>
   `,
 })
 class NavRailHost {
-  readonly sections: LgNavSection[] = [
-    {
-      label: 'Character',
-      items: [
-        { id: 'overview', title: 'Overview', icon: 'overview' },
-        {
-          id: 'inventory',
-          title: 'Inventory',
-          icon: 'inventory',
-          badge: 3,
-          badgeLabel: '3 new items',
-        },
-        {
-          id: 'essences',
-          title: 'Essences',
-          icon: 'essences',
-          locked: true,
-          reason: 'Unlocks at level 20',
-        },
-      ],
-    },
-    {
-      label: 'City',
-      items: [{ id: 'guild', title: 'Guild', icon: 'guild', href: '/guild' }],
-    },
-  ];
-  /** Every `navigate` the rail emitted. */
-  readonly navigations: string[] = [];
+  readonly compact = signal(false);
+  /** Every item whose (click) ran. */
+  readonly pressed: string[] = [];
   /** Whether the last click on the rail was left to follow its link. */
   linkFollowed: boolean | null = null;
 }
 
 describe('LgNavRailComponent', () => {
   async function setup() {
-    TestBed.configureTestingModule({ imports: [NavRailHost] });
+    TestBed.configureTestingModule({
+      providers: [provideRouter([{ path: '**', component: EmptyPage }])],
+    });
     const fixture = TestBed.createComponent(NavRailHost);
+    await TestBed.inject(Router).navigateByUrl('/character/overview');
+    fixture.detectChanges();
+    await fixture.whenStable();
     const rail = await TestbedHarnessEnvironment.loader(fixture).getHarness(
       LgNavRailHarness.with({ label: 'Game' }),
     );
@@ -66,23 +95,23 @@ describe('LgNavRailComponent', () => {
     /** The reason tip while it shows, or null. */
     const shownTip = () =>
       page.getHarnessOrNull(LgTipHarness.with({ shown: true }));
-    return { host: fixture.componentInstance, rail, shownTip };
-  }
-
-  /** The parity scenario's opening: a click on Inventory. */
-  async function clickInventory() {
-    const ctx = await setup();
-    await ctx.rail.click('Inventory');
-    return ctx;
+    return { fixture, host: fixture.componentInstance, rail, shownTip };
   }
 
   beforeEach(lgAnnouncerIdle);
   beforeEach(lgCloseTip);
   afterEach(lgCloseTip);
 
-  it('marks the active item as the current page and the locked one as unavailable', fakeAsync(async () => {
-    const { rail } = await setup();
+  it('is a navigation of named groups; routerLinkActive marks the current page, and the locked item is unavailable', async () => {
+    const { fixture, rail } = await setup();
 
+    expect(await rail.getSectionLabels()).toEqual(['Character', 'City']);
+    const groups = fixture.nativeElement.querySelectorAll('lg-nav-section');
+    expect(groups[0].getAttribute('role')).toBe('group');
+    expect(
+      document.getElementById(groups[0].getAttribute('aria-labelledby'))
+        ?.textContent,
+    ).toBe('Character');
     expect(await rail.getItemTitles()).toEqual([
       'Overview',
       'Inventory',
@@ -92,26 +121,43 @@ describe('LgNavRailComponent', () => {
     expect(await rail.currentTitle()).toBe('Overview');
     expect(await rail.isLocked('Essences')).toBeTrue();
     expect(await rail.isLocked('Inventory')).toBeFalse();
-  }));
+  });
 
-  it('a click on an item emits navigate; the current page is the host’s to change', fakeAsync(async () => {
-    const { host, rail, shownTip } = await clickInventory();
+  it('a click follows the link and your (click) hears it; the current page follows the route', async () => {
+    const { fixture, host, rail, shownTip } = await setup();
 
-    expect(host.navigations).toEqual(['inventory']);
+    await rail.click('Inventory');
+    await fixture.whenStable();
+
+    expect(host.pressed).toEqual(['inventory']);
+    expect(TestBed.inject(Router).url).toBe('/character/inventory');
     expect(await rail.focusedTitle()).toBe('Inventory');
-    expect(await rail.currentTitle()).toBe('Overview');
+    expect(await rail.currentTitle()).toBe('Inventory');
     expect(await shownTip()).toBeNull();
-  }));
+  });
+
+  it('a locked item without a link stays a link in the Tab order', async () => {
+    const { fixture } = await setup();
+    const essences: HTMLElement =
+      fixture.nativeElement.querySelectorAll('a.lg-rail__item')[2];
+
+    expect(essences.hasAttribute('href')).toBeFalse();
+    expect(essences.getAttribute('role')).toBe('link');
+    expect(essences.tabIndex).toBe(0);
+    expect(essences.getAttribute('aria-describedby')).toBeTruthy();
+  });
 
   it('a click on a locked item pins and announces its reason, and never navigates', fakeAsync(async () => {
     lgQuietAnnouncer();
     const watch = lgWatchAnnouncements();
-    const { host, rail, shownTip } = await clickInventory();
+    const { host, rail, shownTip } = await setup();
 
     await rail.click('Essences');
 
-    expect(host.navigations).toEqual(['inventory']);
-    expect(host.linkFollowed).toBeFalse();
+    // The press stops at the item: neither your (click) nor anything around the rail hears it.
+    expect(host.pressed).toEqual([]);
+    expect(host.linkFollowed).toBeNull();
+    expect(TestBed.inject(Router).url).toBe('/character/overview');
     expect(await rail.focusedTitle()).toBe('Essences');
     expect(await rail.currentTitle()).toBe('Overview');
     const tip = await shownTip();
@@ -128,15 +174,42 @@ describe('LgNavRailComponent', () => {
     watch.stop();
   }));
 
-  it('Escape closes the pinned reason and focus stays on the item', fakeAsync(async () => {
-    const { host, rail, shownTip } = await clickInventory();
-    await rail.click('Essences');
+  it('Enter on a locked item shows its condition; Escape closes it and focus stays on the item', fakeAsync(async () => {
+    const { host, rail, shownTip } = await setup();
+    await rail.click('Inventory');
+    await rail.focusItem('Essences');
+
+    await rail.pressKey('Enter');
+    expect(await (await shownTip())?.getReason()).toBe('Unlocks at level 20');
 
     await rail.pressKey('Escape');
-
     expect(await shownTip()).toBeNull();
     expect(await rail.focusedTitle()).toBe('Essences');
-    expect(host.navigations).toEqual(['inventory']);
+    expect(host.pressed).toEqual(['inventory']);
+
+    flush();
+  }));
+
+  it('compact keeps each title as the item’s name, and the locked one’s reason tip names it', fakeAsync(async () => {
+    const { fixture, host, rail, shownTip } = await setup();
+    host.compact.set(true);
+    fixture.detectChanges();
+
+    expect(await rail.getItemTitles()).toEqual([
+      'Overview',
+      'Inventory',
+      'Essences',
+      'Guild',
+    ]);
+    const [overview, , essences] = fixture.nativeElement.querySelectorAll(
+      'a.lg-rail__item .lg-rail__title',
+    );
+    expect(overview.getBoundingClientRect().width).toBeLessThanOrEqual(1);
+    expect(getComputedStyle(essences).display).not.toBe('none');
+
+    await rail.click('Essences');
+    const tip = await shownTip();
+    expect(await tip?.getTitle()).toBe('Essences');
 
     flush();
   }));

@@ -25,6 +25,8 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
         var recovery = version == "tower-balance-recovery-aggregate-v1";
         var limitedArmor = version == "tower-balance-limited-armor-aggregate-v1";
         var niCopyHealth = version == "tower-balance-ni-copy-health-aggregate-v1";
+        var floor14 = version == "tower-balance-floor14-restoration-aggregate-v1";
+        var floor13 = version == "tower-balance-floor13-restoration-aggregate-v1";
         var floor12 = version == "tower-balance-floor12-restoration-aggregate-v1";
         var madKing = version == "tower-balance-mad-king-acceptance-aggregate-v1";
         var niRestoration = version == "tower-balance-ni-restoration-aggregate-v1";
@@ -36,7 +38,7 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
         var fixedKodoku = version == "tower-balance-kodoku-fixed-aggregate-v1";
         var midpointKodoku = version == "tower-balance-kodoku-midpoint-aggregate-v1";
         var fixedAcceptance = fixedKodoku || midpointKodoku;
-        if ((version != "tower-balance-aggregate-v1" && !recovery && !limitedArmor && !limitedResistance && !niCopyHealth && !niPenetration && !niRestoration && !madKing && !floor12 && !miasma && !miasmaResource && !sharedPenetration && !fixedAcceptance) ||
+        if ((version != "tower-balance-aggregate-v1" && !recovery && !limitedArmor && !limitedResistance && !niCopyHealth && !niPenetration && !niRestoration && !madKing && !floor12 && !floor13 && !floor14 && !miasma && !miasmaResource && !sharedPenetration && !fixedAcceptance) ||
             declaration.GetProperty("version").GetString() != version ||
             evidence.GetProperty("status").GetString() != "Verified" || evidence.GetProperty("phase").GetString() != "confirm" ||
             evidence.GetProperty("assessment").GetProperty("verdict").GetString() != "Pass")
@@ -54,6 +56,24 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
             declaration.GetProperty("candidatePlan").GetProperty("version").GetString() != "tower-unchanged-catalog-v1" ||
             declaration.GetProperty("candidatePlan").EnumerateObject().Count() != 1))
             throw new InvalidDataException("The limited-equipment aggregate requires unchanged content and its exact floor and family.");
+        if (floor14)
+        {
+            if (family != 198 || declaration.GetProperty("floor").GetInt32() != 14)
+                throw new InvalidDataException("Floor fourteen acceptance requires all 198 recipes.");
+            Floor14RestorationAcceptanceTests.ValidatePlan(declaration.GetProperty("candidatePlan"));
+        }
+        else if (declaration.TryGetProperty("candidatePlan", out var floor14Plan) && floor14Plan.TryGetProperty("version", out var floor14Version) &&
+                 floor14Version.GetString() == "tower-floor14-restoration-acceptance-v1")
+            throw new InvalidDataException("Floor fourteen requires its separate acceptance contract.");
+        if (floor13)
+        {
+            if (family != 267 || declaration.GetProperty("floor").GetInt32() != 13)
+                throw new InvalidDataException("Floor thirteen acceptance requires all 267 recipes.");
+            Floor13RestorationAcceptanceTests.ValidatePlan(declaration.GetProperty("candidatePlan"));
+        }
+        else if (declaration.TryGetProperty("candidatePlan", out var floor13Plan) && floor13Plan.TryGetProperty("version", out var floor13Version) &&
+                 floor13Version.GetString() == "tower-floor13-restoration-acceptance-v1")
+            throw new InvalidDataException("Floor thirteen requires its separate acceptance contract.");
         if (floor12)
         {
             if (family != 268 || declaration.GetProperty("floor").GetInt32() != 12)
@@ -109,7 +129,7 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
                 throw new InvalidDataException("Shared penetration requires the complete floor-eight family.");
             ValidateSharedPenetrationPlan(declaration.GetProperty("candidatePlan"), fixedKodoku, midpointKodoku);
         }
-        if (count != (floor12 ? 16 : niRestoration ? 8 : madKing || fixedAcceptance ? 32 : recovery || miasmaResource || sharedPenetration ? 8 : 4) || samples != (floor12 ? 32 : niRestoration ? 64 : madKing || miasmaResource || sharedPenetration || fixedAcceptance ? 16 : limitedArmor || limitedResistance || niCopyHealth || niPenetration || miasma ? 32 : 128) || batches.Length != count || paths.Length != count || paths.Distinct().Count() != count ||
+        if (count != (floor12 || floor13 || floor14 ? 16 : niRestoration ? 8 : madKing || fixedAcceptance ? 32 : recovery || miasmaResource || sharedPenetration ? 8 : 4) || samples != (floor12 || floor13 || floor14 ? 32 : niRestoration ? 64 : madKing || miasmaResource || sharedPenetration || fixedAcceptance ? 16 : limitedArmor || limitedResistance || niCopyHealth || niPenetration || miasma ? 32 : 128) || batches.Length != count || paths.Length != count || paths.Distinct().Count() != count ||
             !paths.SequenceEqual(batches.Select(b => b.GetProperty("source").GetString())) ||
             assessment.GetProperty("familySize").GetInt32() != family || assessment.GetProperty("samples").GetInt32() != count*samples ||
             evidence.GetProperty("evaluationFights").GetInt32() != count*samples*family ||
@@ -407,10 +427,10 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
     {
         if (!qualification.TryGetProperty("acceptedSummonsAggregate", out var parent)) return qualification;
         if (qualification.GetProperty("acceptedAggregate").GetProperty("version").GetString() is not
-            ("applied-tower-ni-restoration-aggregate-v1" or "applied-tower-mad-king-acceptance-aggregate-v1" or "applied-tower-floor12-restoration-aggregate-v1") ||
+            ("applied-tower-ni-restoration-aggregate-v1" or "applied-tower-mad-king-acceptance-aggregate-v1" or "applied-tower-floor12-restoration-aggregate-v1" or "applied-tower-floor13-restoration-aggregate-v1") ||
             parent.EnumerateObject().Select(p => p.Name).Order().SequenceEqual(new[] { "acceptedAggregate", "receiptPins" }) is false ||
             parent.GetProperty("acceptedAggregate").GetProperty("version").GetString() != "applied-tower-kodoku-midpoint-aggregate-v1")
-            throw new InvalidDataException("Only the applied Ni/Mad King/floor-twelve-to-Kodoku summon acceptance chain is supported.");
+            throw new InvalidDataException("Only the applied Ni/Mad King/floor-twelve/floor-thirteen-to-Kodoku summon acceptance chain is supported.");
         return parent;
     }
 
@@ -433,6 +453,12 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
     [InlineData("floor12", "parent-version")]
     [InlineData("floor12", "missing-pins")]
     [InlineData("floor12", "extra-parent")]
+    [InlineData("floor13", "valid")]
+    [InlineData("floor13", "missing")]
+    [InlineData("floor13", "outer-version")]
+    [InlineData("floor13", "parent-version")]
+    [InlineData("floor13", "missing-pins")]
+    [InlineData("floor13", "extra-parent")]
     public void Summon_acceptance_chain_requires_exact_independently_applied_parent(string catalog, string change)
     {
         var plan = JsonNode.Parse("""
@@ -441,6 +467,7 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
             """)!;
         if (catalog == "mad-king") plan["acceptedAggregate"]!["version"] = "applied-tower-mad-king-acceptance-aggregate-v1";
         if (catalog == "floor12") plan["acceptedAggregate"]!["version"] = "applied-tower-floor12-restoration-aggregate-v1";
+        if (catalog == "floor13") plan["acceptedAggregate"]!["version"] = "applied-tower-floor13-restoration-aggregate-v1";
         if (change == "missing") plan.AsObject().Remove("acceptedSummonsAggregate");
         if (change == "outer-version") plan["acceptedAggregate"]!["version"] = "unaccepted";
         if (change == "parent-version") plan["acceptedSummonsAggregate"]!["acceptedAggregate"]!["version"] = "unaccepted";
@@ -713,7 +740,7 @@ public sealed class BalanceHarnessTowerBalanceApplicationTests
     internal static void ValidateAggregateEquipment(JsonElement evidence, JsonElement declaration, JsonElement cells)
     {
         var healthPressure = declaration.GetProperty("candidatePlan").GetProperty("version").GetString()
-            is "tower-floor12-restoration-acceptance-v1" or "tower-mad-king-penetration-acceptance-v1" or "tower-ni-restoration-acceptance-v1" or "tower-ni-penetration-v1" or "tower-ni-copy-health-v1" or "tower-health-pressure-candidate-v1" or "tower-recovery-pressure-refinement-v1" or "tower-unchanged-catalog-v1" or "tower-kodoku-miasma-v1" or "tower-kodoku-shared-penetration-v1" or "tower-kodoku-eight-item-pressure-refinement-v1" or "tower-kodoku-eight-item-pressure-midpoint-v1";
+            is "tower-floor14-restoration-acceptance-v1" or "tower-floor13-restoration-acceptance-v1" or "tower-floor12-restoration-acceptance-v1" or "tower-mad-king-penetration-acceptance-v1" or "tower-ni-restoration-acceptance-v1" or "tower-ni-penetration-v1" or "tower-ni-copy-health-v1" or "tower-health-pressure-candidate-v1" or "tower-recovery-pressure-refinement-v1" or "tower-unchanged-catalog-v1" or "tower-kodoku-miasma-v1" or "tower-kodoku-shared-penetration-v1" or "tower-kodoku-eight-item-pressure-refinement-v1" or "tower-kodoku-eight-item-pressure-midpoint-v1";
         var hasContract = declaration.TryGetProperty("equipmentEligibility", out var contract) && contract.ValueKind != JsonValueKind.Null;
         if (!healthPressure && !hasContract) return;
         if (!hasContract || contract.GetProperty("version").GetString() != "tower-limited-equipment-v1" ||

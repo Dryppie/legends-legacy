@@ -38,64 +38,63 @@ export interface LgConstellationRing {
   selector: 'lg-constellation',
   imports: [LgSigilComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: 'display: contents' },
+  host: {
+    class: 'lg-constellation',
+    role: 'group',
+    '[style.aspect-ratio]': "width() + ' / ' + height()",
+    '[attr.aria-label]': 'label()',
+    '(focusin)': 'onFocus($event)',
+    '(keydown)': 'onKeydown($event)',
+  },
   template: `
-    <div
-      class="lg-constellation"
-      [style.aspect-ratio]="width() + ' / ' + height()"
-      role="group"
-      [attr.aria-label]="label()"
-      (focusin)="onFocus($event)"
-      (keydown)="onKeydown($event)"
+    <svg
+      class="lg-constellation__rings"
+      [attr.viewBox]="'0 0 ' + width() + ' ' + height()"
+      preserveAspectRatio="xMidYMid meet"
+      aria-hidden="true"
+      focusable="false"
     >
-      <svg
-        class="lg-constellation__rings"
-        [attr.viewBox]="'0 0 ' + width() + ' ' + height()"
-        preserveAspectRatio="xMidYMid meet"
-        aria-hidden="true"
-        focusable="false"
-      >
-        @for (ring of rings(); track $index) {
-          <circle [attr.cx]="ring.cx" [attr.cy]="ring.cy" [attr.r]="ring.r" [attr.class]="ring.strong ? 'is-strong' : null" />
-        }
-        @for (tick of ticks(); track $index) {
-          <line [attr.x1]="tick.x1" [attr.y1]="tick.y1" [attr.x2]="tick.x2" [attr.y2]="tick.y2" class="lg-constellation__tick" />
-        }
-      </svg>
-      @for (item of items(); track item.id; let i = $index) {
-        <div
-          [class]="'lg-constellation__node lg-constellation__node--' + (item.labelPosition || 'right') + ' lg-constellation__node--' + (item.size || 'md')"
-          [style.left.%]="(item.x / width()) * 100"
-          [style.top.%]="(item.y / height()) * 100"
-        >
-          @if (selectable()) {
-            <button
-              lgSigil
-              [label]="item.label"
-              [value]="item.value"
-              [labelPosition]="item.labelPosition || 'right'"
-              [size]="item.size || 'md'"
-              [state]="item.id === selectedId() ? 'selected' : item.state || 'default'"
-              [reason]="item.reason"
-              [attr.tabindex]="i === active() ? 0 : -1"
-              [attr.data-index]="i"
-              (click)="select.emit(item.id)"
-            ></button>
-          } @else {
-            <div
-              lgSigil
-              [label]="item.label"
-              [value]="item.value"
-              [labelPosition]="item.labelPosition || 'right'"
-              [size]="item.size || 'md'"
-              [state]="item.id === selectedId() ? 'selected' : item.state || 'default'"
-              [attr.data-index]="i"
-            ></div>
-          }
-        </div>
+      @for (ring of rings(); track $index) {
+        <circle [attr.cx]="ring.cx" [attr.cy]="ring.cy" [attr.r]="ring.r" [attr.class]="ring.strong ? 'is-strong' : null" />
       }
-    </div>
+      @for (tick of ticks(); track $index) {
+        <line [attr.x1]="tick.x1" [attr.y1]="tick.y1" [attr.x2]="tick.x2" [attr.y2]="tick.y2" class="lg-constellation__tick" />
+      }
+    </svg>
+    @for (item of items(); track item.id; let i = $index) {
+      <div
+        [class]="'lg-constellation__node lg-constellation__node--' + (item.labelPosition || 'right') + ' lg-constellation__node--' + (item.size || 'md')"
+        [style.left.%]="(item.x / width()) * 100"
+        [style.top.%]="(item.y / height()) * 100"
+      >
+        @if (selectable()) {
+          <button
+            lgSigil
+            [label]="item.label"
+            [value]="item.value"
+            [labelPosition]="item.labelPosition || 'right'"
+            [size]="item.size || 'md'"
+            [state]="item.id === selectedId() ? 'selected' : item.state || 'default'"
+            [reason]="item.reason"
+            [attr.tabindex]="i === active() ? 0 : -1"
+            [attr.data-index]="i"
+            (click)="select.emit(item.id)"
+          ></button>
+        } @else {
+          <div
+            lgSigil
+            [label]="item.label"
+            [value]="item.value"
+            [labelPosition]="item.labelPosition || 'right'"
+            [size]="item.size || 'md'"
+            [state]="item.id === selectedId() ? 'selected' : item.state || 'default'"
+            [attr.data-index]="i"
+          ></div>
+        }
+      </div>
+    }
   `,
+  styleUrl: './constellation.component.css',
 })
 export class LgConstellationComponent {
   readonly items = input.required<readonly LgConstellationItem[]>();

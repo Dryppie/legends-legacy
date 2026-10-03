@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {
   LgButtonComponent,
   LgJourneyCardComponent,
-  LgSlotDirective,
+  LgJourneyCardActionsComponent,
 } from '@grimoire';
 import {
   ShowcaseEntryComponent,
@@ -16,7 +16,7 @@ import { ShowcaseEntry } from '../showcase.types';
     ShowcaseStoryDirective,
     LgJourneyCardComponent,
     LgButtonComponent,
-    LgSlotDirective,
+    LgJourneyCardActionsComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -27,20 +27,19 @@ import { ShowcaseEntry } from '../showcase.types';
     >
       <div class="lg-region">
         <lg-journey-card
-          id="sc-journey-default"
           [stages]="stages"
           phase="Shenic Journey"
-          title="Develop your Shenic build"
+          heading="Develop your Shenic build"
           summary="Fight in the newest available area, strengthen your loadout, and prepare for the next Shenic challenge."
           objective="Choose a current quest or return to the World Map."
           nextUnlock="A third Essence slot at level 20"
         >
-          <button lgButton="solid" lgSlot="actions" size="sm" icon="world-map">
-            Open World Map
-          </button>
-          <button lgButton lgSlot="actions" size="sm">
-            Optional: Review Loadout
-          </button>
+          <lg-journey-card-actions>
+            <button lgButton="solid" size="sm" icon="world-map">
+              Open World Map
+            </button>
+            <button lgButton size="sm">Optional: Review Loadout</button>
+          </lg-journey-card-actions>
         </lg-journey-card>
       </div>
     </ng-template>
@@ -52,20 +51,19 @@ import { ShowcaseEntry } from '../showcase.types';
     >
       <div class="lg-region">
         <lg-journey-card
-          id="sc-journey-narrow"
           [stages]="stages"
           phase="Shenic Journey"
-          title="Develop your Shenic build"
+          heading="Develop your Shenic build"
           summary="Fight in the newest available area, strengthen your loadout, and prepare for the next Shenic challenge."
           objective="Choose a current quest or return to the World Map."
           nextUnlock="A third Essence slot at level 20"
         >
-          <button lgButton="solid" lgSlot="actions" size="sm" icon="world-map">
-            Open World Map
-          </button>
-          <button lgButton lgSlot="actions" size="sm">
-            Optional: Review Loadout
-          </button>
+          <lg-journey-card-actions>
+            <button lgButton="solid" size="sm" icon="world-map">
+              Open World Map
+            </button>
+            <button lgButton size="sm">Optional: Review Loadout</button>
+          </lg-journey-card-actions>
         </lg-journey-card>
       </div>
     </ng-template>
@@ -77,25 +75,19 @@ import { ShowcaseEntry } from '../showcase.types';
     >
       <div class="lg-region">
         <lg-journey-card
-          id="sc-journey-first"
           [stages]="stages"
           phase="First Hunt"
-          title="Continue the First Steps"
+          heading="Continue the First Steps"
           summary="Open the Quest Journal to continue the guided introduction."
           objective="Open the Quest Journal and follow the highlighted objective."
           nextUnlock="Soul Archive after completing your First Hunt"
         >
-          <button
-            lgButton="solid"
-            lgSlot="actions"
-            size="sm"
-            icon="quest-journal"
-          >
-            Open Quests
-          </button>
-          <button lgButton lgSlot="actions" size="sm">
-            Optional: Review Tutorial
-          </button>
+          <lg-journey-card-actions>
+            <button lgButton="solid" size="sm" icon="quest-journal">
+              Open Quests
+            </button>
+            <button lgButton size="sm">Optional: Review Tutorial</button>
+          </lg-journey-card-actions>
         </lg-journey-card>
       </div>
     </ng-template>
@@ -107,21 +99,22 @@ import { ShowcaseEntry } from '../showcase.types';
     >
       <div class="lg-region">
         <lg-journey-card
-          id="sc-journey-complete"
           [stages]="stages"
           phase="Journey Complete"
-          title="Shenic Beta journey complete"
+          heading="Shenic Beta journey complete"
           summary="You reached level 30, cleared the Heart of the Hollow, and completed the focused Beta journey."
           objective="Review the build that carried you through Shenic and the choices you made along the way."
           nextUnlockLabel="Future aspiration"
           nextUnlock="Future Shenic chapters beyond the focused Beta"
         >
-          <button lgButton="solid" lgSlot="actions" size="sm" icon="essences">
-            Review Your Build
-          </button>
-          <button lgButton lgSlot="actions" size="sm">
-            Optional: Review Completed Quests
-          </button>
+          <lg-journey-card-actions>
+            <button lgButton="solid" size="sm" icon="essences">
+              Review Your Build
+            </button>
+            <button lgButton size="sm">
+              Optional: Review Completed Quests
+            </button>
+          </lg-journey-card-actions>
         </lg-journey-card>
       </div>
     </ng-template>
@@ -132,7 +125,7 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="Only the phase and the title: no Track, objective or next unlock."
     >
       <div class="lg-region">
-        <lg-journey-card phase="Tower" title="Climb" />
+        <lg-journey-card phase="Tower" heading="Climb" />
       </div>
     </ng-template>
   `,
@@ -153,7 +146,7 @@ export const JOURNEY_CARD_SHOWCASE: ShowcaseEntry = {
   name: 'JourneyCard',
   tier: 'game',
   summary: 'The next-step guide.',
-  covers: ['LgJourneyCardComponent'],
+  covers: ['LgJourneyCardComponent', 'LgJourneyCardActionsComponent'],
   readme: 'src/app/grimoire/game/journey-card/README.md',
   component: JourneyCardShowcaseComponent,
 };

@@ -260,16 +260,16 @@ The matrix says which states each kind of part can show. ● The part shows the 
 
 | Category | Components |
 | --- | --- |
-| Commands | Button |
-| Toggles and tabs | Tabs, toggle Buttons |
+| Commands | Button, Icon button |
+| Toggles and tabs | Tabs, toggle Buttons, Switch, Checkbox, Radio group, Segmented |
 | Navigation | NavRail, ItemLink, the TopBar menu |
-| Lists and rows | List and ListRow (the scene variant too), Ledger rows, Chronicle lines |
+| Lists and rows | List and ListRow (the scene variant too), Ledger rows, Table rows, Menu items, Chronicle lines |
 | Slots | ItemSlot, LoadoutSlot |
 | Stat marks | Sigil, Constellation, Meter, Track, LevelPlate |
 | Labels | Tag, Presence |
 | Values | Ledger values, StatFigure, CurrencyPill, Delta, table figures |
-| Regions | Panel, Folio, Page, Stage, Chronicle, JourneyCard |
-| Fields | SearchField, inputs, the Chronicle's composer |
+| Regions | Panel, Folio, Page, Stage, Chronicle, JourneyCard, and the Region state each shows in place of its content |
+| Fields | SearchField, Field and Input, Select, the Chronicle's composer |
 
 | State | Commands | Toggles and tabs | Navigation | Lists and rows | Slots | Stat marks | Labels | Values | Regions | Fields |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -345,6 +345,8 @@ Labels show their states only as words, and Values show theirs only as figures, 
 | ListRow `state`, `reason`, `ready`; NavRail items `locked`, `reason`, `ready` | A blocked row or a locked rail item, with its reason (how it unlocks); `ready`, the attention diamond |
 | LoadoutSlot `reason` | A locked slot's condition, printed as its name |
 | Sigil `reason` | The unlock condition of a locked stat |
+| `lg-region-state` `state`, `heading` | A region's Loading, Empty, no results or Error, in place of its content, with its sentence and way forward (D-145) |
+| `lg-skeleton` `shape`, `count` | Loading's still blocks, shown after 300ms |
 
 ## Do and don't
 

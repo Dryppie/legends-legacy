@@ -14,10 +14,9 @@ function gcd(a: number, b: number): number {
 @Component({
   selector: 'lg-emblem',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: 'display: contents' },
+  host: { class: 'lg-emblem', '[style.width.px]': 'size()', '[style.height.px]': 'size()' },
   template: `
     <svg
-      class="lg-emblem"
       [attr.width]="size()"
       [attr.height]="size()"
       viewBox="0 0 100 100"
@@ -41,6 +40,7 @@ function gcd(a: number, b: number): number {
       }
     </svg>
   `,
+  styleUrl: './emblem.component.css',
 })
 export class LgEmblemComponent {
   /** Star points, 5–12. */

@@ -16,9 +16,9 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="A single key: a small rectangle at radius-control, in code-style capitals."
     >
       <div class="sc-row">
-        <lg-key>E</lg-key>
-        <lg-key>B</lg-key>
-        <lg-key>A</lg-key>
+        <kbd lgKey>E</kbd>
+        <kbd lgKey>B</kbd>
+        <kbd lgKey>A</kbd>
       </div>
     </ng-template>
 
@@ -27,12 +27,12 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="Words and symbols widen the cap; it never gets narrower than square."
     >
       <div class="sc-row">
-        <lg-key>Esc</lg-key>
-        <lg-key>↵</lg-key>
-        <lg-key>Tab</lg-key>
-        <lg-key>Shift</lg-key>
-        <lg-key>←</lg-key>
-        <lg-key>→</lg-key>
+        <kbd lgKey>Esc</kbd>
+        <kbd lgKey>↵</kbd>
+        <kbd lgKey>Tab</kbd>
+        <kbd lgKey>Shift</kbd>
+        <kbd lgKey>←</kbd>
+        <kbd lgKey>→</kbd>
       </div>
     </ng-template>
 
@@ -41,15 +41,15 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="How KeyHints sets it: the label in ink-muted caption, then the cap."
     >
       <div class="sc-row">
-        <p class="sc-cap">Back <lg-key>Esc</lg-key></p>
-        <p class="sc-cap">Buy <lg-key>B</lg-key></p>
-        <p class="sc-cap">Select <lg-key>↵</lg-key></p>
+        <p class="sc-cap">Back <kbd lgKey>Esc</kbd></p>
+        <p class="sc-cap">Buy <kbd lgKey>B</kbd></p>
+        <p class="sc-cap">Select <kbd lgKey>↵</kbd></p>
       </div>
     </ng-template>
 
     <ng-template scStory="In running text">
       <p>
-        Press <lg-key>E</lg-key> to level up, or <lg-key>Esc</lg-key> to go
+        Press <kbd lgKey>E</kbd> to level up, or <kbd lgKey>Esc</kbd> to go
         back.
       </p>
     </ng-template>

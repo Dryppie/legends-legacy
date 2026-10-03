@@ -20,7 +20,7 @@ const KEYS: Record<LgNavRailKey, TestKey> = {
   Escape: TestKey.ESCAPE,
 };
 
-/** `lg-nav-rail`: the main navigation. Items are found by their title ("Inventory"). */
+/** `lg-nav-rail`: the main navigation, its `a[lgNavItem]` destinations found by their title ("Inventory"). */
 export class LgNavRailHarness extends ComponentHarness {
   static hostSelector = 'lg-nav-rail';
 
@@ -35,14 +35,19 @@ export class LgNavRailHarness extends ComponentHarness {
     );
   }
 
-  private readonly nav = this.locatorFor('nav');
   private readonly items = this.locatorForAll('a.lg-rail__item');
   private readonly titles = this.locatorForAll(
     'a.lg-rail__item .lg-rail__title',
   );
 
   async getLabel(): Promise<string | null> {
-    return (await this.nav()).getAttribute('aria-label');
+    return (await this.host()).getAttribute('aria-label');
+  }
+
+  /** Each section's label, in order. */
+  async getSectionLabels(): Promise<string[]> {
+    const labels = await this.locatorForAll('.lg-rail__group')();
+    return parallel(() => labels.map((label) => label.text()));
   }
 
   /** Every item's title, in order, across the sections. */
@@ -58,6 +63,11 @@ export class LgNavRailHarness extends ComponentHarness {
     await item.click();
   }
 
+  /** Focus moves to the item, as Tab does. */
+  async focusItem(title: string): Promise<void> {
+    await (await this.item(title)).focus();
+  }
+
   /** The pointer moves onto the item. */
   async hover(title: string): Promise<void> {
     await (await this.item(title)).hover();
@@ -68,14 +78,15 @@ export class LgNavRailHarness extends ComponentHarness {
     await (await this.item(title)).mouseAway();
   }
 
-  /** A key pressed while focus is on an item. Enter also follows the link, as the browser does. */
+  /** A key pressed while focus is on an item. Enter on a link with an href also clicks it, as the browser does. */
   async pressKey(key: LgNavRailKey): Promise<void> {
     const items = await this.items();
     const focused = await parallel(() => items.map((item) => item.isFocused()));
     const item = items[focused.indexOf(true)];
     if (!item) throw Error('No item has focus.');
     await item.sendKeys(KEYS[key]);
-    if (key === 'Enter') await item.click();
+    if (key === 'Enter' && (await item.getAttribute('href')) !== null)
+      await item.click();
   }
 
   /** The item that has focus, or null. */

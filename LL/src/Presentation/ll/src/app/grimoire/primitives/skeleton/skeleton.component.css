@@ -1,0 +1,26 @@
+/* ---------- Skeleton (D-145) ----------
+   The Loading state's fill (Standards · States · Data): still blocks of surface-raised in the shape of what is coming,
+   at radius-control. Nothing moves — no shimmer or pulse (Foundations · Motion · Loops). They wait 300ms before they
+   show, so a quick load never flashes them: the animation has no length, only the delay, and shows them when it ends. */
+@keyframes lg-skeleton-wait { from { visibility: hidden; } }
+:host { display: grid; min-width: 0; animation: lg-skeleton-wait 0s linear 300ms backwards; }
+.lg-skeleton__bar { display: block; border-radius: var(--lg-radius-control); background: var(--lg-surface-raised); }
+
+/* Text: each bar takes one line of the region's text, a band of it filled; the last of several is shorter. */
+:host(.lg-skeleton--text) { padding-block: calc((var(--lg-row-leading) - 0.625rem) / 2); row-gap: calc(var(--lg-row-leading) - 0.625rem); }
+:host(.lg-skeleton--text) .lg-skeleton__bar { height: 0.625rem; }
+:host(.lg-skeleton--text) .lg-skeleton__bar:last-child:not(:first-child) { width: 60%; }
+
+/* Rows: each bar is a row at the region's row height (--lg-row), with the gap of a list's rows. */
+:host(.lg-skeleton--rows) { row-gap: var(--lg-space-1); }
+:host(.lg-skeleton--rows) .lg-skeleton__bar { height: calc(var(--lg-row) - var(--lg-space-1)); }
+
+/* Block: the host is the block — a portrait, a tile, a figure — the thumbnail's size unless given one. */
+:host(.lg-skeleton--block) {
+  width: var(--lg-thumb); height: var(--lg-thumb);
+  border-radius: var(--lg-radius-control); background: var(--lg-surface-raised);
+}
+
+@media (forced-colors: active) {
+  .lg-skeleton__bar, :host(.lg-skeleton--block) { border: 1px solid GrayText; }
+}

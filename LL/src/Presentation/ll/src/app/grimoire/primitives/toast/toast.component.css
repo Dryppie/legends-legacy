@@ -1,0 +1,30 @@
+/* ---------- Toast (D-145) ----------
+   A Level 2 float: surface-raised, a line-strong hairline, radius-float, shadow-float (Foundations · Surfaces &
+   Layering), with a 2px start bar in its tone, as the Notice has (D-111). The heading is body-compact-strong in ink, the
+   text a caption in ink-muted; the action is a link Button and Dismiss a small icon button, both on the heading's
+   line. No ornament (Principles · Anti-generic guardrails). Its motion is the stack's (toaster.css). */
+:host {
+  --lg-toast-tone: var(--lg-info);
+  display: flex; align-items: flex-start; gap: var(--lg-space-2); box-sizing: border-box; width: 100%;
+  padding: var(--lg-space-2) var(--lg-space-2) var(--lg-space-2) var(--lg-space-4);
+  border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-float);
+  background: var(--lg-surface-raised);
+  box-shadow: inset var(--lg-border-emphasis) 0 0 var(--lg-toast-tone), var(--lg-shadow-float);
+  color: var(--lg-ink); font-family: var(--lg-font-ui); text-align: start; pointer-events: auto;
+}
+:host(.lg-toast--success) { --lg-toast-tone: var(--lg-success); }
+:host(.lg-toast--warning) { --lg-toast-tone: var(--lg-warning); }
+:host(.lg-toast--danger) { --lg-toast-tone: var(--lg-danger); }
+/* The heading's first line sits on the centre line of the 32px Dismiss button. */
+.lg-toast__body {
+  display: grid; gap: 2px; flex: 1 1 auto; min-width: 0;
+  padding-block: calc((var(--lg-control-compact) - var(--lg-leading-body-compact)) / 2);
+}
+.lg-toast__heading { margin: 0; font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact); font-weight: 600; color: var(--lg-ink); overflow-wrap: anywhere; }
+.lg-toast__text { margin: 0; font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); overflow-wrap: anywhere; }
+.lg-toast__action { flex: none; margin-top: calc((var(--lg-control-compact) - var(--lg-target-min)) / 2); margin-inline: var(--lg-space-1); }
+.lg-toast__dismiss { flex: none; }
+
+@media (forced-colors: active) {
+  :host { border-color: CanvasText; border-inline-start-width: 3px; }
+}

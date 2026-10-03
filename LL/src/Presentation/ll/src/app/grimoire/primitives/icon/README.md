@@ -6,7 +6,7 @@ The game's icon set.
 
 The game's own sidebar icons, redrawn to inherit `currentColor` so they take any ink token — and the standard every future icon is drawn to (Foundations · Iconography).
 
-**Provide:** `name` (one of `LG_ICON_NAMES`), `size` (16, 20 or 24; 20 by default; 12 only for a marker) and, for a standalone icon that means something, a `title`.
+**Provide:** `name` (one of `LG_ICON_NAMES`), `size` (16, 20 or 24; 20 by default; 12 only for a marker) and, for a standalone icon that means something, a `label` — its accessible name (`role="img"`). The host is the icon's box, `size` square, and an unknown name takes no room (D-143).
 
 - **The standard:** a 24-unit grid with a 20-unit live area, a 1.6 stroke, round caps and joins, no fill, in `currentColor` — the geometry of the SVGs in the Icons asset group, without their baked gold gradient. Two strays are queued for redrawing: `combat-styles` (1.75 stroke) and `quest-journal` (a 22-unit view box).
 - **Sizes:** `icon-lg` 24px for display, `icon-md` 20px by default, `icon-sm` 16px inline and in Compact, and `icon-marker` 12px for solid markers only. Another size, or a line icon under 16px, logs a console warning.

@@ -6,7 +6,7 @@ The next-step guide.
 
 The player's guided next step: where they are in the journey, what to do now, and what they unlock next.
 
-**Provide:** `phase` (the current stage name), `stages` (all stage names, in order, drawn as a Track), `title`, `summary`, `objective` (shown as "Recommended now"), an `actions` slot (one `solid` Button for the main action, one `primary` for the optional one), `nextUnlockLabel` and `nextUnlock`.
+**Provide:** `phase` (the current stage name), `stages` (all stage names, in order, drawn as a Track), `heading`, `summary`, `objective` (shown as "Recommended now"), an `lg-journey-card-actions` (one `solid` Button for the main action, one `primary` for the optional one), `nextUnlockLabel` and `nextUnlock`. Its host is the card, a region named by its heading (D-143).
 
 - Maps one-to-one onto the game's player-journey guidance, so the copy comes straight from it.
 - **Level 1 on the Page** (Foundations · Surfaces & Layering): `surface`, like a Panel, with no edge, shadow, frame or grain: its fill and the space around it set it apart (Foundations · Lines). Inside, separation hairlines divide the next unlock and the Track. It used to borrow the Folio's surface, `shadow-panel` and a gilt frame (D-055).

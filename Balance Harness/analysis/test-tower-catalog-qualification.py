@@ -427,5 +427,11 @@ class Floor12SummonAcceptanceChainTests(SummonAcceptanceChainTests):
         self.plan['acceptedAggregate']['version'] = 'applied-tower-floor12-restoration-aggregate-v1'
 
 
+class Floor13SummonAcceptanceChainTests(SummonAcceptanceChainTests):
+    def setUp(self):
+        super().setUp()
+        self.plan['acceptedAggregate']['version'] = 'applied-tower-floor13-restoration-aggregate-v1'
+
+
 if __name__ == '__main__':
     unittest.main()

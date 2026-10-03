@@ -1,0 +1,33 @@
+/* ---------- Switch (Proposed, D-144) ----------
+   A rectangle track with a square thumb (Foundations · Shape: no pill). Off: a well with the thumb at the start in
+   ink-muted. On is selected, arcana's job: the arcana-soft track with an arcana edge, the thumb at the end in
+   arcana-glow. The thumb's place says it too, never colour alone. */
+:host { display: inline-flex; min-width: 0; }
+.lg-switch__control {
+  display: inline-flex; align-items: center; gap: var(--lg-space-3); min-height: 1.5rem; min-width: 0;
+  margin: 0; padding: 0; border: 0; background: none; color: var(--lg-ink); cursor: pointer; text-align: left;
+  font-family: var(--lg-font-ui); font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact);
+}
+.lg-switch__track {
+  position: relative; flex: none; width: 2.25rem; height: 1.25rem; box-sizing: border-box;
+  border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-control); background: var(--lg-ground-deep);
+}
+.lg-switch__thumb {
+  position: absolute; top: 50%; left: 0.1875rem; width: 0.75rem; height: 0.75rem; margin-top: -0.375rem;
+  border-radius: var(--lg-radius-control); background: var(--lg-ink-muted);
+  /* Feedback: the thumb slides over duration-fast; at once under reduced motion. */
+  transition: transform var(--lg-duration-fast) var(--lg-ease-standard);
+}
+.lg-switch__control:hover .lg-switch__track { border-color: var(--lg-ink-muted); }
+.lg-switch__control:focus-visible { outline: 2px solid transparent; }
+.lg-switch__control:focus-visible .lg-switch__track { box-shadow: var(--lg-focus-ring); }
+:host(.is-checked) .lg-switch__track { background: var(--lg-arcana-soft); border-color: var(--lg-arcana); }
+:host(.is-checked) .lg-switch__thumb { background: var(--lg-arcana-glow); transform: translateX(0.9375rem); }
+.lg-switch__label { min-width: 0; }
+:host(.is-disabled) .lg-switch__control { color: var(--lg-ink-disabled); cursor: not-allowed; }
+:host(.is-disabled) .lg-switch__track { border-color: var(--lg-line); background: transparent; }
+:host(.is-disabled) .lg-switch__thumb { background: var(--lg-ink-disabled); }
+@media (forced-colors: active) {
+  .lg-switch__thumb { forced-color-adjust: none; background: CanvasText; }
+  :host(.is-checked) .lg-switch__thumb { background: Highlight; }
+}

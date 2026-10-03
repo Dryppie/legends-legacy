@@ -4,9 +4,9 @@ The key cap.
 
 **Status:** Draft
 
-A keyboard key drawn as a small cap — Esc, E, ↵ — after the words for what it does: "Back (Esc)". KeyHints, a Button's `hotkey` and the Chronicle's send key draw their own; `lg-key` sets one anywhere else a key is named, such as running text.
+A keyboard key drawn as a small cap — Esc, E, ↵ — after the words for what it does: "Back (Esc)". KeyHints, a Button's `hotkey` and the Chronicle's send key draw their own; `kbd[lgKey]` sets one anywhere else a key is named, such as running text.
 
-**Provide:** the key's name as content: `<lg-key>Esc</lg-key>`.
+**Provide:** the key's name as content of a `kbd`: `<kbd lgKey>Esc</kbd>`. The host is the key (D-143).
 
 - **A small rectangle, like a key** (Foundations · Shape): a `border-hairline` `line-strong` edge on a `surface` fill at `radius-control` (4px), the corner of Buttons, inputs, tabs and Tags. It was a pill (D-064).
 - **Set in `code`** (Foundations · Typography): Barlow 700 capitals in `ink`, 11px with `tracking-code`. Key caps and rarity codes are the only text under 12px. Its line height is `leading-mark`, so the cap adds no height to its line.

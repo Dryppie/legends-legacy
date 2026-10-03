@@ -4,33 +4,35 @@
   [backdrop]="backdrop"
   [(chroniclePosition)]="chatPosition"
 >
-  <app-rail-grimoire lgSlot="rail" />
+  <lg-shell-rail><app-rail-grimoire /></lg-shell-rail>
 
   @if (character(); as c) {
-    <lg-top-bar lgSlot="top" [title]="c.name" [eyebrow]="'Lv. ' + level()" showMenu>
-      <app-top-center-grimoire lgSlot="center" />
-      <button
-        lgCurrencyPill
-        name="Cinders"
-        [amount]="c.cinders"
-        iconSrc="assets/game-emblems/cinders-v1-64.webp"
-        [short]="shortCurrency()"
-        tooltip="Toggle abbreviated currency values"
-        (click)="toggleCurrencyFormat()"
-      ></button>
-      <button
-        lgCurrencyPill
-        name="Soulstones"
-        [amount]="c.soulstones"
-        iconSrc="assets/game-emblems/soulstones-v1-64.webp"
-        [short]="shortCurrency()"
-        tooltip="Toggle abbreviated currency values"
-        (click)="toggleCurrencyFormat()"
-      ></button>
-    </lg-top-bar>
+    <lg-shell-top>
+      <lg-top-bar [heading]="c.name" [eyebrow]="'Lv. ' + level()" showMenu>
+        <lg-top-bar-center><app-top-center-grimoire /></lg-top-bar-center>
+        <button
+          lgCurrencyPill
+          name="Cinders"
+          [amount]="c.cinders"
+          iconSrc="assets/game-emblems/cinders-v1-64.webp"
+          [short]="shortCurrency()"
+          tooltip="Toggle abbreviated currency values"
+          (click)="toggleCurrencyFormat()"
+        ></button>
+        <button
+          lgCurrencyPill
+          name="Soulstones"
+          [amount]="c.soulstones"
+          iconSrc="assets/game-emblems/soulstones-v1-64.webp"
+          [short]="shortCurrency()"
+          tooltip="Toggle abbreviated currency values"
+          (click)="toggleCurrencyFormat()"
+        ></button>
+      </lg-top-bar>
+    </lg-shell-top>
   }
 
-  <app-chat-grimoire lgSlot="chronicle" />
+  <lg-shell-chronicle><app-chat-grimoire /></lg-shell-chronicle>
 
   <!-- An old screen's sheet fills the stage between the frame's lines, notices included (D-116). -->
   <div class="dg-stage" [class.ll-game-surface]="bootstrapLoaded() && !grimoireView()">

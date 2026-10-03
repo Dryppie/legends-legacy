@@ -1,5 +1,5 @@
 /* ---------- KeyHints ---------- */
-.lg-keyhints { display: flex; flex-wrap: wrap; gap: var(--lg-space-5); align-items: center; }
+:host { display: flex; flex-wrap: wrap; gap: var(--lg-space-5); align-items: center; }
 .lg-keyhints__item {
   display: inline-flex; align-items: center; gap: var(--lg-space-2);
   color: var(--lg-ink-muted); font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); font-weight: 400;

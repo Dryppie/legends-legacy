@@ -64,7 +64,7 @@ import { ShowcaseEntry } from '../showcase.types';
       <div class="sc-row">
         <span
           ><lg-icon name="colosseum" [size]="20" /> Colosseum
-          <lg-icon name="lock" [size]="12" title="Locked"
+          <lg-icon name="lock" [size]="12" label="Locked"
         /></span>
         <lg-icon name="lock" [size]="12" />
         <lg-icon name="lock" [size]="16" />
@@ -77,7 +77,7 @@ import { ShowcaseEntry } from '../showcase.types';
     >
       <div class="sc-row">
         <span
-          ><lg-icon name="nobility" [size]="12" title="Active Nobility" />
+          ><lg-icon name="nobility" [size]="12" label="Active Nobility" />
           Aldric Vane</span
         >
         <lg-icon name="nobility" [size]="16" />
@@ -89,9 +89,9 @@ import { ShowcaseEntry } from '../showcase.types';
       notes="A standalone icon that means something gets a title: it becomes an image named by it. Without one it is hidden, since the label beside it names the thing."
     >
       <div class="sc-row">
-        <lg-icon name="inventory" [size]="16" title="Inventory" />
-        <lg-icon name="settings" title="Settings" />
-        <lg-icon name="world-map" [size]="24" title="World Map" />
+        <lg-icon name="inventory" [size]="16" label="Inventory" />
+        <lg-icon name="settings" label="Settings" />
+        <lg-icon name="world-map" [size]="24" label="World Map" />
       </div>
     </ng-template>
 

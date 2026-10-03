@@ -4,7 +4,9 @@ import {
   LgCurrencyPillComponent,
   LgGameShellComponent,
   LgObjectiveComponent,
-  LgSlotDirective,
+  LgShellTopComponent,
+  LgObjectivePanelComponent,
+  LgTopBarCenterComponent,
   LgTopBarComponent,
   LgTrackComponent,
 } from '@grimoire';
@@ -19,12 +21,14 @@ import { ShowcaseEntry } from '../showcase.types';
   imports: [
     ShowcaseStoryDirective,
     LgTopBarComponent,
+    LgTopBarCenterComponent,
     LgCurrencyPillComponent,
     LgObjectiveComponent,
     LgTrackComponent,
     LgButtonComponent,
     LgGameShellComponent,
-    LgSlotDirective,
+    LgShellTopComponent,
+    LgObjectivePanelComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -34,7 +38,7 @@ import { ShowcaseEntry } from '../showcase.types';
       width="60rem"
       flush
     >
-      <lg-top-bar title="Aldric Vane" eyebrow="Lv. 42">
+      <lg-top-bar heading="Aldric Vane" eyebrow="Lv. 42">
         <button
           lgCurrencyPill
           name="Cinders"
@@ -59,25 +63,28 @@ import { ShowcaseEntry } from '../showcase.types';
       height="15.5rem"
       flush
     >
-      <lg-top-bar title="Aldric Vane" eyebrow="Lv. 42">
-        <lg-objective
-          lgSlot="center"
-          kicker="Quest"
-          title="The First Hunt"
-          objective="Defeat wolves in the Whispering Woods"
-          [current]="3"
-          [required]="5"
-          [(open)]="questOpen"
-        >
-          <div lgSlot="panel" class="sc-col">
-            <p class="sc-cap">Welcome to Legends Legacy · Chain 1 of 4</p>
-            <ul class="sc-col">
-              <li><b>3 / 5</b> Defeat wolves in the Whispering Woods</li>
-              <li><b>0 / 1</b> Attune an Essence</li>
-            </ul>
-            <button lgButton="link" size="sm">Open Quests</button>
-          </div>
-        </lg-objective>
+      <lg-top-bar heading="Aldric Vane" eyebrow="Lv. 42">
+        <lg-top-bar-center>
+          <lg-objective
+            kicker="Quest"
+            heading="The First Hunt"
+            objective="Defeat wolves in the Whispering Woods"
+            [current]="3"
+            [required]="5"
+            [(open)]="questOpen"
+          >
+            <lg-objective-panel>
+              <div class="sc-col">
+                <p class="sc-cap">Welcome to Legends Legacy · Chain 1 of 4</p>
+                <ul class="sc-col">
+                  <li><b>3 / 5</b> Defeat wolves in the Whispering Woods</li>
+                  <li><b>0 / 1</b> Attune an Essence</li>
+                </ul>
+                <button lgButton="link" size="sm">Open Quests</button>
+              </div>
+            </lg-objective-panel>
+          </lg-objective>
+        </lg-top-bar-center>
         <button
           lgCurrencyPill
           name="Cinders"
@@ -101,16 +108,17 @@ import { ShowcaseEntry } from '../showcase.types';
       width="60rem"
       flush
     >
-      <lg-top-bar title="Aldric Vane" eyebrow="Lv. 42">
-        <lg-track
-          lgSlot="center"
-          [steps]="5"
-          [current]="2"
-          tone="hp"
-          startLabel="Floor 3"
-          endLabel="Boss"
-          label="World Tower"
-        />
+      <lg-top-bar heading="Aldric Vane" eyebrow="Lv. 42">
+        <lg-top-bar-center>
+          <lg-track
+            [steps]="5"
+            [current]="2"
+            tone="hp"
+            startLabel="Floor 3"
+            endLabel="Boss"
+            label="World Tower"
+          />
+        </lg-top-bar-center>
         <button
           lgCurrencyPill
           name="Cinders"
@@ -136,16 +144,18 @@ import { ShowcaseEntry } from '../showcase.types';
       flush
     >
       <lg-game-shell height="3.5rem">
-        <lg-top-bar lgSlot="top" title="Aldric Vane" eyebrow="Lv. 42" showMenu>
-          <button
-            lgCurrencyPill
-            name="Cinders"
-            [amount]="12480"
-            iconSrc="assets/game-emblems/cinders-v1-64.webp"
-            short
-            toggle
-          ></button>
-        </lg-top-bar>
+        <lg-shell-top>
+          <lg-top-bar heading="Aldric Vane" eyebrow="Lv. 42" showMenu>
+            <button
+              lgCurrencyPill
+              name="Cinders"
+              [amount]="12480"
+              iconSrc="assets/game-emblems/cinders-v1-64.webp"
+              short
+              toggle
+            ></button>
+          </lg-top-bar>
+        </lg-shell-top>
       </lg-game-shell>
     </ng-template>
 
@@ -155,16 +165,17 @@ import { ShowcaseEntry } from '../showcase.types';
       width="36rem"
       flush
     >
-      <lg-top-bar title="Aldric Vane" eyebrow="Lv. 42">
-        <lg-track
-          lgSlot="center"
-          [steps]="5"
-          [current]="2"
-          tone="hp"
-          startLabel="Floor 3"
-          endLabel="Boss"
-          label="World Tower"
-        />
+      <lg-top-bar heading="Aldric Vane" eyebrow="Lv. 42">
+        <lg-top-bar-center>
+          <lg-track
+            [steps]="5"
+            [current]="2"
+            tone="hp"
+            startLabel="Floor 3"
+            endLabel="Boss"
+            label="World Tower"
+          />
+        </lg-top-bar-center>
         <button
           lgCurrencyPill
           name="Cinders"
@@ -188,7 +199,7 @@ import { ShowcaseEntry } from '../showcase.types';
       width="24rem"
       flush
     >
-      <lg-top-bar title="Aldric Vane the Unbroken" eyebrow="Lv. 42">
+      <lg-top-bar heading="Aldric Vane the Unbroken" eyebrow="Lv. 42">
         <button
           lgCurrencyPill
           name="Cinders"
@@ -216,7 +227,7 @@ export const TOP_BAR_SHOWCASE: ShowcaseEntry = {
   name: 'TopBar',
   tier: 'shell',
   summary: 'The top bar.',
-  covers: ['LgTopBarComponent'],
+  covers: ['LgTopBarComponent', 'LgTopBarCenterComponent'],
   readme: 'src/app/grimoire/shell/top-bar/README.md',
   component: TopBarShowcaseComponent,
 };

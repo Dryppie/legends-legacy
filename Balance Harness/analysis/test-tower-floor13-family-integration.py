@@ -176,7 +176,7 @@ class FamilyIntegrationTests(unittest.TestCase):
 
     def test_combat_modes_and_other_modifications_rejected_before_allocation(self):
         changes = [ ['--mode', mode] for mode in ('screen', 'confirm', 'search') ] + [
-            ['--floor', '14'], ['--current-content'], ['--health-factor', '.8'], ['--offense-factor', '.8'],
+            ['--floor', '15'], ['--current-content'], ['--health-factor', '.8'], ['--offense-factor', '.8'],
             ['--penetration-factor', '2'], ['--add-search', 'extra'], ['--add-references', 'extra'],
             ['--ability-candidate', 'candidate'], ['--health-pressure-candidate', 'candidate'],
             ['--recovery-pressure-candidate', 'candidate'], ['--gear-reference', 'a', 'b'],

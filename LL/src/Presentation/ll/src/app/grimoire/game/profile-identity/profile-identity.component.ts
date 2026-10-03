@@ -14,6 +14,11 @@ import { LgPresenceComponent } from '../presence/presence.component';
   selector: 'div[lgProfileFact]',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<dt>{{ label() }}</dt><dd><ng-content /></dd>`,
+  styles: `
+    :host { display: flex; flex-wrap: wrap; align-items: center; gap: var(--lg-space-2); min-width: 0; }
+    dt { color: var(--lg-ink-muted); }
+    dd { margin: 0; display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--lg-space-2); color: var(--lg-ink); font-variant-numeric: tabular-nums; }
+  `,
 })
 export class LgProfileFactComponent {
   readonly label = input.required<string>();
@@ -33,38 +38,37 @@ export interface LgProfilePresence {
   selector: 'lg-profile-identity',
   imports: [LgHeadingComponent, LgIconComponent, LgPresenceComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: 'display: contents' },
+  host: { class: 'lg-identity' },
   template: `
-    <div class="lg-identity">
-      @if (eyebrow()) {
-        <span class="lg-identity__eyebrow">{{ eyebrow() }}</span>
+    @if (eyebrow()) {
+      <span class="lg-identity__eyebrow">{{ eyebrow() }}</span>
+    }
+    <div class="lg-identity__name">
+      @if (noble()) {
+        <span class="lg-identity__noble" role="img" aria-label="Noble" title="Active Nobility"
+          ><lg-icon name="nobility" [size]="16"
+        /></span>
       }
-      <div class="lg-identity__name">
-        @if (noble()) {
-          <span class="lg-identity__noble" role="img" aria-label="Noble" title="Active Nobility"
-            ><lg-icon name="nobility" [size]="16"
-          /></span>
+      @switch (headingTag()) {
+        @case ('h1') {
+          <h1 lgHeading="screen" [attr.id]="headingId() ?? null">{{ name() }}</h1>
         }
-        @switch (headingTag()) {
-          @case ('h1') {
-            <h1 lgHeading="screen" [attr.id]="headingId() ?? null">{{ name() }}</h1>
-          }
-          @case ('h3') {
-            <h3 lgHeading="screen" [attr.id]="headingId() ?? null">{{ name() }}</h3>
-          }
-          @default {
-            <h2 lgHeading="screen" [attr.id]="headingId() ?? null">{{ name() }}</h2>
-          }
+        @case ('h3') {
+          <h3 lgHeading="screen" [attr.id]="headingId() ?? null">{{ name() }}</h3>
         }
-        @if (presence(); as p) {
-          <lg-presence [online]="p.online" [lastSeen]="p.lastSeen" />
+        @default {
+          <h2 lgHeading="screen" [attr.id]="headingId() ?? null">{{ name() }}</h2>
         }
-      </div>
-      @if (facts().length) {
-        <dl class="lg-identity__facts"><ng-content /></dl>
+      }
+      @if (presence(); as p) {
+        <lg-presence [online]="p.online" [lastSeen]="p.lastSeen" />
       }
     </div>
+    @if (facts().length) {
+      <dl class="lg-identity__facts"><ng-content /></dl>
+    }
   `,
+  styleUrl: './profile-identity.component.css',
 })
 export class LgProfileIdentityComponent {
   /** "Combat Profile"; "Viewing player" on someone else's. */

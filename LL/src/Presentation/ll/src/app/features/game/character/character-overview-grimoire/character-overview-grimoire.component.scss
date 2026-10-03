@@ -39,24 +39,11 @@
   color: var(--lg-ink-muted);
 }
 
-// Region states (Standards · States · Data).
+// Region states (lg-region-state, D-145) stand straight on the Page here, so they take a surface and an inset.
 .ovw-state {
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--lg-space-2);
   padding: var(--lg-inset-lg);
+  border-radius: var(--lg-radius-container);
   background: var(--lg-surface);
-  font-size: var(--lg-text-body-compact);
-  line-height: var(--lg-leading-body-compact);
-  color: var(--lg-ink-muted);
-}
-.ovw-state--error {
-  color: var(--lg-danger);
-}
-.ovw-state__glyph {
-  font-weight: 700;
 }
 
 // Nobility perks, in the Banner's footer.

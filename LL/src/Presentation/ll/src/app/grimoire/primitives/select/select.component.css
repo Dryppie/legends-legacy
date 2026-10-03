@@ -1,0 +1,35 @@
+/* ---------- Select (D-146) ----------
+   The button is a well, as an Input is (Foundations · Surfaces & Layering): ground-deep with a line-strong edge at
+   radius-control, as tall as the region's controls, the choice in body-compact ink (the placeholder ink-muted) and the
+   expand chevron at its end in ink-muted, turned over while the list is open. The list is a Level 2 float on the CDK
+   overlay beneath it, at least as wide, holding lg-options; the chosen one carries the arcana-glow bar. */
+:host { display: block; min-width: 0; }
+.lg-select__trigger {
+  display: flex; align-items: center; gap: var(--lg-space-2); box-sizing: border-box; width: 100%; min-width: 0;
+  height: var(--lg-control); margin: 0; padding: 0 var(--lg-space-3) 0 var(--lg-space-4);
+  border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-control);
+  background: var(--lg-ground-deep); color: var(--lg-ink); cursor: pointer; text-align: start;
+  font-family: var(--lg-font-ui); font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact);
+}
+.lg-select__trigger:hover:not(:disabled) { border-color: var(--lg-ink-muted); }
+.lg-select__trigger:focus-visible { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); }
+.lg-select__trigger[aria-invalid='true'] { border-color: var(--lg-danger); }
+.lg-select__trigger:disabled { color: var(--lg-ink-disabled); border-color: var(--lg-line); cursor: not-allowed; }
+.lg-select__value { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-select__value.is-placeholder { color: var(--lg-ink-muted); }
+.lg-select__trigger:disabled .lg-select__value { color: var(--lg-ink-disabled); }
+.lg-select__chevron { color: var(--lg-ink-muted); transition: transform var(--lg-duration-fast) var(--lg-ease-standard); }
+:host(.is-open) .lg-select__chevron { transform: rotate(180deg); }
+/* The overlay's pane is a flex box at least as wide as the button: the list fills it. */
+.lg-select__panel {
+  flex: 1 1 auto; min-width: 0; box-sizing: border-box;
+  max-height: 16rem; overflow-y: auto; padding: var(--lg-space-1);
+  border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-float);
+  background: var(--lg-surface-raised); box-shadow: var(--lg-shadow-float);
+  color: var(--lg-ink); font-family: var(--lg-font-ui);
+  animation: lg-enter var(--lg-duration-fast) var(--lg-ease-enter) both; --lg-enter-y: calc(-1 * var(--lg-space-1));
+}
+@media (forced-colors: active) {
+  .lg-select__trigger[aria-invalid='true'] { border-style: dashed; }
+  .lg-select__panel { border-color: CanvasText; }
+}

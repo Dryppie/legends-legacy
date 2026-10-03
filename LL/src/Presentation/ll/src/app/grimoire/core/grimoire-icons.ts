@@ -24,6 +24,10 @@ export const LG_ICONS = {
   'nobility': { viewBox: '0 0 24 24', strokeWidth: 1.6, body: '<path d="M3.2 17.6 2.6 7.4l5.3 4.4L12 4l4.1 7.8 5.3-4.4-.6 10.2z" fill="currentColor" stroke="none"/><path d="M3.6 20.2h16.8" stroke-width="2.2" stroke-linecap="butt"/>', marker: true },
   // The Locked marker: a closed padlock, drawn at 12px, which the NavRail shows on a locked destination in place of the word (D-113). Not a sidebar icon.
   'lock': { viewBox: '0 0 24 24', strokeWidth: 1.6, body: '<path d="M7.5 11V8.2a4.5 4.5 0 0 1 9 0V11" fill="none" stroke-width="2.4" stroke-linecap="butt"/><rect x="4.5" y="11" width="15" height="10" rx="1.6" fill="currentColor" stroke="none"/>', marker: true },
+  // Close: a dialog, a toast. Two strokes, never the × character; an icon button named "Close" or "Dismiss" (D-145).
+  'close': { viewBox: '0 0 24 24', strokeWidth: 1.6, body: '<path d="M6.5 6.5l11 11"/><path d="M17.5 6.5l-11 11"/>' },
+  // Expand, and collapse turned over: a chevron, never a filled triangle (Foundations · Iconography). The Select's and the Chronicle's (D-145).
+  'expand': { viewBox: '0 0 24 24', strokeWidth: 1.6, body: '<path d="M6 9l6 6 6-6"/>' },
 } as const;
 
 export type LgIconName = keyof typeof LG_ICONS;

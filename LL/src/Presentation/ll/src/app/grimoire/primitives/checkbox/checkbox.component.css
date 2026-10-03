@@ -1,0 +1,37 @@
+/* ---------- Checkbox (Proposed, D-144) ----------
+   A 16px rectangle at radius-control, a well with a line-strong edge (Foundations · Shape: not a circle, which means
+   presence). Checked is selected, arcana's job (Foundations · Colour): an arcana-glow fill with the tick in ground. */
+:host { display: inline-flex; min-width: 0; }
+.lg-checkbox__label {
+  display: inline-flex; align-items: center; gap: var(--lg-space-2); min-height: 1.5rem; min-width: 0;
+  font-family: var(--lg-font-ui); font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact); color: var(--lg-ink);
+  cursor: pointer;
+}
+.lg-checkbox__box { position: relative; flex: none; display: grid; width: 1rem; height: 1rem; }
+/* The native checkbox, invisible, over the drawn box: it takes the press, the focus and the keys. */
+.lg-checkbox__input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: inherit; }
+.lg-checkbox__mark {
+  display: grid; place-items: center; width: 100%; height: 100%; box-sizing: border-box;
+  border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-control); background: var(--lg-ground-deep);
+  pointer-events: none;
+}
+.lg-checkbox__label:hover .lg-checkbox__mark { border-color: var(--lg-ink-muted); }
+.lg-checkbox__input:focus-visible + .lg-checkbox__mark { box-shadow: var(--lg-focus-ring); }
+.lg-checkbox__input:checked + .lg-checkbox__mark, .lg-checkbox__input:indeterminate + .lg-checkbox__mark { background: var(--lg-arcana-glow); border-color: var(--lg-arcana-glow); }
+/* The tick: an L turned 45°, drawn in ground. */
+.lg-checkbox__input:checked + .lg-checkbox__mark::after {
+  content: ""; width: 0.3125rem; height: 0.5625rem; margin-top: -0.125rem;
+  border: solid var(--lg-ground); border-width: 0 0.125rem 0.125rem 0; transform: rotate(45deg);
+}
+/* Indeterminate: a dash. */
+.lg-checkbox__input:indeterminate + .lg-checkbox__mark::after { content: ""; width: 0.5rem; height: 0.125rem; background: var(--lg-ground); }
+.lg-checkbox__text { min-width: 0; }
+/* Disabled: the words and the edge step back, and it takes no press. */
+:host(.is-disabled) .lg-checkbox__label { color: var(--lg-ink-disabled); cursor: not-allowed; }
+:host(.is-disabled) .lg-checkbox__mark { border-color: var(--lg-line); background: transparent; }
+:host(.is-disabled) .lg-checkbox__input:checked + .lg-checkbox__mark { background: var(--lg-ink-disabled); border-color: var(--lg-ink-disabled); }
+@media (forced-colors: active) {
+  .lg-checkbox__input:checked + .lg-checkbox__mark, .lg-checkbox__input:indeterminate + .lg-checkbox__mark { forced-color-adjust: none; background: Highlight; border-color: Highlight; }
+  .lg-checkbox__input:checked + .lg-checkbox__mark::after { border-color: HighlightText; }
+  .lg-checkbox__input:indeterminate + .lg-checkbox__mark::after { background: HighlightText; }
+}

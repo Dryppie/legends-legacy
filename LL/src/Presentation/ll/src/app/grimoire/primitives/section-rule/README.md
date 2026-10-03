@@ -6,7 +6,7 @@ The dividers.
 
 Dividers between groups of content: a filled label band (Status, Biography), a plain hairline, or the engraved diamond-chain ornament. A divider is the second way to set groups apart, after space and a heading, and a full border is never the third (Foundations · Lines · The decision ladder).
 
-**Provide:** `variant` (`band`, `hairline`, `ornament`), optional `label`, `align="end"` and an `aside` slot (`lgSlot="aside"`).
+**Provide:** `variant` (`band`, `hairline`, `ornament`), optional `label`, `align="end"` and an `lg-section-rule-aside` (a count or a quiet word, "3 of 5"). Its host is the separator (D-143).
 
 - `band`: a `line` strip with an `ink` `label`-style caption, for data groups in stat columns. Data groups only.
 - `hairline`: a `border-hairline` `line` rule, drawn beside its optional `label` (in `ink-muted`) and `aside`, so it needs no background to cut it. For any other group, and only where space and a heading are not enough.

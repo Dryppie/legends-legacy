@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
-/** A key cap: `<lg-key>Esc</lg-key>`. */
+/** A key cap: `<kbd lgKey>Esc</kbd>`. The host is the key. */
 @Component({
-  selector: 'lg-key',
+  selector: 'kbd[lgKey]',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: 'display: contents' },
-  template: `<kbd class="lg-key"><ng-content /></kbd>`,
+  host: { class: 'lg-key' },
+  template: `<ng-content />`,
+  styleUrl: './key.component.css',
 })
 export class LgKeyComponent {}

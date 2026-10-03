@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { LgSectionRuleComponent, LgSlotDirective } from '@grimoire';
+import { LgSectionRuleAsideComponent, LgSectionRuleComponent } from '@grimoire';
 import {
   ShowcaseEntryComponent,
   ShowcaseStoryDirective,
@@ -8,7 +8,11 @@ import { ShowcaseEntry } from '../showcase.types';
 
 @Component({
   selector: 'sc-section-rule-showcase',
-  imports: [ShowcaseStoryDirective, LgSectionRuleComponent, LgSlotDirective],
+  imports: [
+    ShowcaseStoryDirective,
+    LgSectionRuleComponent,
+    LgSectionRuleAsideComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ng-template
@@ -33,7 +37,7 @@ import { ShowcaseEntry } from '../showcase.types';
       width="26.25rem"
     >
       <lg-section-rule label="Status"
-        ><span lgSlot="aside">Live</span></lg-section-rule
+        ><lg-section-rule-aside>Live</lg-section-rule-aside></lg-section-rule
       >
     </ng-template>
 
@@ -43,7 +47,7 @@ import { ShowcaseEntry } from '../showcase.types';
       width="26.25rem"
     >
       <lg-section-rule variant="hairline" label="Rewards"
-        ><span lgSlot="aside">3 of 5</span></lg-section-rule
+        ><lg-section-rule-aside>3 of 5</lg-section-rule-aside></lg-section-rule
       >
     </ng-template>
 
@@ -71,7 +75,7 @@ export const SECTION_RULE_SHOWCASE: ShowcaseEntry = {
   name: 'SectionRule',
   tier: 'primitives',
   summary: 'The dividers.',
-  covers: ['LgSectionRuleComponent'],
+  covers: ['LgSectionRuleComponent', 'LgSectionRuleAsideComponent'],
   readme: 'src/app/grimoire/primitives/section-rule/README.md',
   component: SectionRuleShowcaseComponent,
 };

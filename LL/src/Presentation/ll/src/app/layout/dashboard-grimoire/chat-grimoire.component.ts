@@ -34,11 +34,15 @@ import { TimeSyncService } from '../../core/services/api/time-sync/time-sync.ser
 import { LootHistoryEntry } from '../../shared/models/loot-history';
 import {
   LgButtonComponent,
+  LgChronicleAsideComponent,
   LgChronicleComponent,
+  LgChronicleComposerComponent,
   LgChronicleMessage,
-  LgChronicleTextDirective,
+  LgChronicleMessageDirective,
   LgKeyComponent,
-  LgSlotDirective,
+  LG_MENU,
+  LG_POPOVER,
+  LgCheckboxComponent,
 } from '@grimoire';
 import { chronicleChannelId, chronicleChannels, lootLine, toChronicleLine, withDayBreaks } from './chat-chronicle';
 
@@ -60,10 +64,14 @@ import { chronicleChannelId, chronicleChannels, lootLine, toChronicleLine, withD
     ChatComposerDirective,
     ItemComponent,
     LgChronicleComponent,
-    LgChronicleTextDirective,
+    LgChronicleMessageDirective,
+    LgChronicleAsideComponent,
+    LgChronicleComposerComponent,
     LgButtonComponent,
     LgKeyComponent,
-    LgSlotDirective,
+    LgCheckboxComponent,
+    ...LG_POPOVER,
+    ...LG_MENU,
   ],
   providers: [ChatMentionSuggestionsService],
   templateUrl: './chat-grimoire.component.html',
@@ -256,7 +264,7 @@ export class ChatGrimoireComponent extends ChatComponent {
       }
     });
     this.menuRef.attach(new TemplatePortal(this.playerMenuTpl(), this.vcr, { $implicit: name }));
-    setTimeout(() => (this.menuRef?.overlayElement.querySelector('button') as HTMLElement | null)?.focus());
+    setTimeout(() => (this.menuRef?.overlayElement.querySelector('.lg-menu__item') as HTMLElement | null)?.focus());
   }
 
   protected closePlayerMenu(): void {

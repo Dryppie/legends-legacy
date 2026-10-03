@@ -14,45 +14,46 @@ function iconWarn(key: string, message: string): void {
 }
 
 /**
- * One of the game's icons, redrawn in currentColor. An unknown name draws nothing: the label beside it is the
- * fallback, so a missing icon never leaves a hole.
+ * One of the game's icons, redrawn in currentColor. The host is the icon's box, `size` square (as rem, so it scales
+ * with the reading size). An unknown name draws nothing and takes no room: the label beside it is the fallback, so a
+ * missing icon never leaves a hole.
  */
 @Component({
   selector: 'lg-icon',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    style: 'display: contents',
-    // `title` is an input here; keep the static attribute from becoming a native tooltip.
-    '[attr.title]': 'null',
+    '[class.lg-icon]': '!!icon()',
+    '[class.is-missing]': '!icon()',
+    '[style.--lg-icon-size]': "size() / 16 + 'rem'",
+    '[attr.role]': "label() ? 'img' : null",
+    '[attr.aria-label]': 'label() || null',
+    '[attr.aria-hidden]': "label() ? null : 'true'",
   },
   template: `
     @if (icon(); as d) {
       <svg
-        class="lg-icon"
         [attr.width]="size()"
         [attr.height]="size()"
         [attr.viewBox]="d.viewBox"
-        [style.--lg-icon-size]="size() / 16 + 'rem'"
         fill="none"
         stroke="currentColor"
         [attr.stroke-width]="strokeWidth() ?? d.strokeWidth"
         stroke-linecap="round"
         stroke-linejoin="round"
-        [attr.role]="title() ? 'img' : null"
-        [attr.aria-label]="title() || null"
-        [attr.aria-hidden]="title() ? null : 'true'"
+        aria-hidden="true"
         focusable="false"
         [innerHTML]="body()"
       ></svg>
     }
   `,
+  styleUrl: './icon.component.css',
 })
 export class LgIconComponent {
   readonly name = input.required<LgIconName>();
   /** In px, set as rem so the icon scales with the reading size. */
   readonly size = input<LgIconSize>(20);
-  /** Set only when the icon stands alone and carries meaning. */
-  readonly title = input<string>();
+  /** What the icon means, when it stands alone and carries meaning: its accessible name. Leave it unset beside words. */
+  readonly label = input<string>();
   readonly strokeWidth = input<number>();
 
   private readonly sanitizer = inject(DomSanitizer);

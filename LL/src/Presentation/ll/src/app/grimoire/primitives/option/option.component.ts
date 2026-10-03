@@ -10,18 +10,24 @@ import {
 import { Highlightable } from '@angular/cdk/a11y';
 import { lgUniqueId } from '../../core/grimoire-core';
 
-/** What an option reports to the list it sits in: a SearchField's suggestions (later a Select's). */
+/** What an option reports to the list it sits in: a SearchField's suggestions, a Select's options. */
 export abstract class LgOptionParent {
   /** The pointer is over the option: highlight it. */
   abstract highlight(option: LgOptionComponent): void;
   /** The option was pressed: choose it. */
   abstract choose(option: LgOptionComponent): void;
+  /** Whether the option is the list's current choice (a Select's value). Read in a template, so a signal keeps it current. */
+  isChosen(option: LgOptionComponent): boolean {
+    void option;
+    return false;
+  }
 }
 
 /**
  * One option of a list that keeps focus in its field (an ARIA combobox): the field moves a highlight through the
  * options (`aria-activedescendant`), and the highlighted one is `aria-selected`. Its words are its content; `value` is
- * what choosing it gives. `<lg-option value="Maren">Maren</lg-option>`
+ * what choosing it gives. `<lg-option value="Maren">Maren</lg-option>`. In a Select, the current choice is also marked
+ * chosen: a 2px `arcana-glow` bar at its start and weight 600 (Selected, Standards · States).
  */
 @Component({
   selector: 'lg-option',
@@ -31,6 +37,7 @@ export abstract class LgOptionParent {
     class: 'lg-option',
     '[id]': 'id',
     '[class.is-active]': 'active()',
+    '[class.is-chosen]': '!!parent?.isChosen(this)',
     '[attr.aria-selected]': 'active()',
     '[attr.aria-disabled]': "isDisabled() ? 'true' : null",
     '(mouseenter)': 'parent?.highlight(this)',

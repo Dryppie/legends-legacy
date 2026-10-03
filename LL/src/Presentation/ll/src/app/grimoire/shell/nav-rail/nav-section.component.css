@@ -1,0 +1,11 @@
+/* ---------- NavRail section ---------- */
+:host { display: block; }
+.lg-rail__group {
+  display: flex; align-items: center; gap: var(--lg-space-2);
+  margin: 0 0 var(--lg-space-1) var(--lg-space-1);
+  font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ink-muted);
+}
+.lg-rail__group::after { content: ""; flex: 1; height: var(--lg-border-hairline); background: var(--lg-line); }
+.lg-rail__items { display: grid; gap: 2px; }
+/* Compact: icons only; the label still names the group. */
+:host(.is-compact) .lg-rail__group { display: none; }

@@ -4,7 +4,7 @@ The current action.
 
 **Status:** Draft
 
-What the character is doing now — "Engaged in Combat", "Idle" — with the time left, its progress and the way to it. It sits at the head of the NavRail (its `header` slot), where the game's sidebar has always shown it (D-109).
+What the character is doing now — "Engaged in Combat", "Idle" — with the time left, its progress and the way to it. It sits at the head of the NavRail (its `lg-nav-rail-header`), where the game's sidebar has always shown it (D-109).
 
 **Provide:** `label` (the action), `remaining` (the time left, already printed: "00:12"), progress as `value` of `max` or `progress` 0–1, the host — `<button lgActivity>` or `<a lgActivity>` to go to the action (a press is the native `(click)`), `<div lgActivity>` to show it — `openLabel` ("Go to action" by default; `''` for none), and `compact` in the compact rail.
 

@@ -2,12 +2,13 @@
  * Grimoire's stylesheet. angular.json builds this file as its own bundle, grimoire.css, outside the app's first load,
  * and lgLoadStyles (core/grimoire-styles.ts) adds it at startup (D-096, D-132).
  *
- * Each part's styles live beside it (<tier>/<name>/<name>.component.css); what no part owns is in styles/. They are
- * plain global CSS, not yet attached to their components: the order below is the cascade order, and selectors still
- * reach from one part into another (.lg-shell .lg-topbar), so a later rule may rely on coming after an earlier one. Keep
- * the order. Plan phase 3 moves each file to its component's styleUrl, encapsulated, as it re-shapes the component, and
- * takes it off this list: Panel, Page, PageHeader, Banner, Folio, Notice (D-136), Ledger (D-137), List and Tabs (D-138),
- * ItemSlot, ItemLink, LoadoutSlot, Sigil, CurrencyPill and Activity (D-139), and SearchField (D-140) have moved.
+ * Each part's styles live beside it (<tier>/<name>/<name>.component.css) on its styleUrl, encapsulated (plan phase 3,
+ * D-136 to D-143). What stays here is global on purpose: the tokens and the base; Heading and Button, whose classes
+ * other parts and screens still set on their own elements, and the Table, whose cells are the screen's own markup
+ * (D-146); the attention mark; the Chronicle's parts a host's aside or composer may use (chronicle-parts.css); the
+ * legacy region (D-108), which a host's own markup carries; the layout classes, the tip and the layers the CDK draws
+ * outside every component (overlay.css: the dialog's pane and scrim, the toasts' layer). The order below is the
+ * cascade order.
  *
  * Every size here is written for the 16px root: the legacy rem rebase leaves src/app/grimoire/ alone.
  */
@@ -15,27 +16,11 @@
 @import '../tokens/tokens.css';
 @import './base.css';
 @import '../primitives/heading/heading.component.css';
-@import '../primitives/key/key.component.css';
 @import '../primitives/button/button.component.css';
-@import '../components/key-hints/key-hints.component.css';
-@import '../primitives/tag/tag.component.css';
-@import '../game/constellation/constellation.component.css';
-@import '../primitives/meter/meter.component.css';
-@import '../components/track/track.component.css';
-@import '../game/level-plate/level-plate.component.css';
-@import '../components/delta/delta.component.css';
-@import '../primitives/section-rule/section-rule.component.css';
-@import '../game/emblem/emblem.component.css';
+@import '../primitives/table/table.component.css';
 @import './attention.css';
-@import '../shell/nav-rail/nav-rail.component.css';
-@import '../shell/stage/stage.component.css';
-@import '../shell/top-bar/top-bar.component.css';
-@import '../shell/game-shell/game-shell.component.css';
-@import '../shell/chronicle/chronicle.component.css';
+@import '../shell/chronicle/chronicle-parts.css';
+@import './legacy-region.css';
 @import './layout.css';
-@import '../components/stat-figure/stat-figure.component.css';
-@import '../game/journey-card/journey-card.component.css';
-@import '../game/profile-identity/profile-identity.component.css';
-@import '../shell/objective/objective.component.css';
-@import '../game/presence/presence.component.css';
 @import './tip.css';
+@import './overlay.css';

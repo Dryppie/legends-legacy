@@ -14,14 +14,11 @@ export type { LgTagTone } from '../../core/grimoire-states';
 @Component({
   selector: 'lg-tag',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: 'display: contents' },
-  template: `
-    <span [class]="classes()" [attr.aria-hidden]="ariaHidden() ? 'true' : null"
-      >@if (glyph()) {<span class="lg-tag__glyph" aria-hidden="true">{{ glyph() }}</span>}<ng-content
-      />{{ word() }}@if (value() != null) {<span class="lg-tag__value">{{ formatted() }}</span
-        >}@if (srText()) {<span class="lg-sr">{{ srText() }}</span>}</span
-    >
-  `,
+  host: { '[class]': 'classes()', '[attr.aria-hidden]': "ariaHidden() ? 'true' : null" },
+  template: `@if (glyph()) {<span class="lg-tag__glyph" aria-hidden="true">{{ glyph() }}</span>}<ng-content
+    />{{ word() }}@if (value() != null) {<span class="lg-tag__value">{{ formatted() }}</span
+      >}@if (srText()) {<span class="lg-sr">{{ srText() }}</span>}`,
+  styleUrl: './tag.component.css',
 })
 export class LgTagComponent {
   readonly tone = input<LgTagTone>();

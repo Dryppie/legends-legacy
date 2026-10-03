@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import {
   LgButtonComponent,
   LgObjectiveComponent,
-  LgSlotDirective,
+  LgObjectivePanelComponent,
 } from '@grimoire';
 import {
   ShowcaseEntryComponent,
@@ -16,7 +16,7 @@ import { ShowcaseEntry } from '../showcase.types';
     ShowcaseStoryDirective,
     LgObjectiveComponent,
     LgButtonComponent,
-    LgSlotDirective,
+    LgObjectivePanelComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -27,7 +27,7 @@ import { ShowcaseEntry } from '../showcase.types';
     >
       <lg-objective
         kicker="Quest"
-        title="The First Hunt"
+        heading="The First Hunt"
         objective="Defeat wolves in the Whispering Woods"
         [current]="3"
         [required]="5"
@@ -44,18 +44,18 @@ import { ShowcaseEntry } from '../showcase.types';
           <p class="sc-cap">Objective without a count</p>
           <lg-objective
             kicker="Quest"
-            title="Paths of the Ember"
+            heading="Paths of the Ember"
             objective="Choose your reward"
           />
         </div>
         <div class="sc-cell">
           <p class="sc-cap">Title only</p>
-          <lg-objective kicker="Quest" title="The First Hunt" />
+          <lg-objective kicker="Quest" heading="The First Hunt" />
         </div>
         <div class="sc-cell">
           <p class="sc-cap">No kicker</p>
           <lg-objective
-            title="The First Hunt"
+            heading="The First Hunt"
             objective="Defeat wolves"
             [current]="3"
             [required]="5"
@@ -71,19 +71,21 @@ import { ShowcaseEntry } from '../showcase.types';
     >
       <lg-objective
         kicker="Quest"
-        title="The First Hunt"
+        heading="The First Hunt"
         objective="Defeat wolves in the Whispering Woods"
         [current]="3"
         [required]="5"
       >
-        <div lgSlot="panel" class="sc-col">
-          <p class="sc-cap">Welcome to Legends Legacy · Chain 1 of 4</p>
-          <ul class="sc-col">
-            <li><b>3 / 5</b> Defeat wolves in the Whispering Woods</li>
-            <li><b>0 / 1</b> Attune an Essence</li>
-          </ul>
-          <button lgButton="link" size="sm">Open Quests</button>
-        </div>
+        <lg-objective-panel>
+          <div class="sc-col">
+            <p class="sc-cap">Welcome to Legends Legacy · Chain 1 of 4</p>
+            <ul class="sc-col">
+              <li><b>3 / 5</b> Defeat wolves in the Whispering Woods</li>
+              <li><b>0 / 1</b> Attune an Essence</li>
+            </ul>
+            <button lgButton="link" size="sm">Open Quests</button>
+          </div>
+        </lg-objective-panel>
       </lg-objective>
     </ng-template>
 
@@ -95,20 +97,22 @@ import { ShowcaseEntry } from '../showcase.types';
     >
       <lg-objective
         kicker="Quest"
-        title="The First Hunt"
+        heading="The First Hunt"
         objective="Defeat wolves in the Whispering Woods"
         [current]="3"
         [required]="5"
         [(open)]="trackerOpen"
       >
-        <div lgSlot="panel" class="sc-col">
-          <p class="sc-cap">Welcome to Legends Legacy · Chain 1 of 4</p>
-          <ul class="sc-col">
-            <li><b>3 / 5</b> Defeat wolves in the Whispering Woods</li>
-            <li><b>0 / 1</b> Attune an Essence</li>
-          </ul>
-          <button lgButton="link" size="sm">Open Quests</button>
-        </div>
+        <lg-objective-panel>
+          <div class="sc-col">
+            <p class="sc-cap">Welcome to Legends Legacy · Chain 1 of 4</p>
+            <ul class="sc-col">
+              <li><b>3 / 5</b> Defeat wolves in the Whispering Woods</li>
+              <li><b>0 / 1</b> Attune an Essence</li>
+            </ul>
+            <button lgButton="link" size="sm">Open Quests</button>
+          </div>
+        </lg-objective-panel>
       </lg-objective>
     </ng-template>
 
@@ -119,7 +123,7 @@ import { ShowcaseEntry } from '../showcase.types';
     >
       <lg-objective
         kicker="Quest"
-        title="The Long Road Through the Ashen Wastes of Shenic"
+        heading="The Long Road Through the Ashen Wastes of Shenic"
         objective="Defeat the Ember Knights guarding the old temple gates"
         [current]="1250"
         [required]="2000"
@@ -136,7 +140,7 @@ export const OBJECTIVE_SHOWCASE: ShowcaseEntry = {
   name: 'Objective',
   tier: 'shell',
   summary: 'The pinned quest.',
-  covers: ['LgObjectiveComponent'],
+  covers: ['LgObjectiveComponent', 'LgObjectivePanelComponent'],
   readme: 'src/app/grimoire/shell/objective/README.md',
   component: ObjectiveShowcaseComponent,
 };

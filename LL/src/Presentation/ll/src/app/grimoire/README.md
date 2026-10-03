@@ -12,7 +12,7 @@ shell and the Character Overview use it, behind Settings → Interface → New l
 | --- | --- |
 | `index.ts` | The public API: every part, directive, helper and token constant, and `LG_GRIMOIRE` |
 | `tokens/` | Generated from `design-system/tokens.json` by `design-system/scripts/build-tokens.mjs`: `tokens.css` (every token as a `--lg-*` property, the `.lg-type-*` classes, `@font-face`), `tokens.ts` (`LG_DURATION`, `LG_EASING`, `LG_BREAKPOINT`, `LG_CONTENT_TIER`, `LG_LAYER`) and `fonts/`. Never edit them (D-131). |
-| `styles/` | What no part owns: `base.css`, `layout.css`, `attention.css`, `tip.css` (the one tip float, D-134), and `grimoire.css`, which puts every global stylesheet in cascade order (D-132); `frame-corners.css` is the corner ornaments the Folio and the Banner each take into their own styles |
+| `styles/` | What no part owns: `base.css`, `layout.css`, `attention.css`, `tip.css` (the one tip float, D-134), `overlay.css` (the dialog's pane and scrim and the toasts' layer, which the CDK draws outside every component, D-145), and `grimoire.css`, which puts every global stylesheet in cascade order (D-132); `frame-corners.css` is the corner ornaments the Folio and the Banner each take into their own styles |
 | `core/` | Shared helpers (below), and `grimoire-icons.ts`, generated from `design-system/icons.json` by `design-system/scripts/build-icons.mjs` |
 | `primitives/`, `components/`, `game/`, `shell/` | One folder per part: `<name>.component.ts` (or `<name>.directive.ts` for a part without markup), with the part's region components in the same file, `<name>.component.css`, `<name>.component.spec.ts` (where there is one yet) and `README.md`, its guidelines |
 | `testing/` | Test harnesses for the parts, and the announcer helpers, imported as `@grimoire/testing` (D-130) |
@@ -48,8 +48,7 @@ A part's regions are child components, each styling itself (D-136); a part with 
 </lg-panel>
 ```
 
-Parts not yet re-shaped (plan phase 3, steps 16 to 18) still take named slots through the `lgSlot` directive
-(`<lg-nav-rail lgSlot="rail">`); it is part of `LG_GRIMOIRE` and goes in step 19.
+Every part's host is its box, and every region is a child component: there is no slot directive (D-143).
 
 A screen that has moved to Grimoire lives in a `-grimoire` folder, carries the `lg-root` class on its host, and styles
 itself with tokens only (`var(--lg-ink-muted)`); `src/app/features/game/character/character-overview-grimoire/` is the
@@ -57,25 +56,34 @@ worked example.
 
 ### The shell and the chat setting
 
-`lg-game-shell` lays out the rail, top bar, stage, Folio and Chronicle. Its `chatLayout` input takes the same
-`'docked' | 'floating'` value the Settings page stores, so it can be bound straight to `ChatLayoutPreferenceService`:
+`lg-game-shell` lays out the rail, top bar, stage, Folio and Chronicle, each in its region. Its `chatLayout` input takes
+the same `'docked' | 'floating'` value the Settings page stores, so it can be bound straight to
+`ChatLayoutPreferenceService`. The NavRail is composed, and the router marks the current item:
 
 ```html
 <lg-game-shell [chatLayout]="chatLayout.layout()" [(chroniclePosition)]="chatPosition">
-  <lg-nav-rail lgSlot="rail" [sections]="nav" [activeId]="activeRoute()" />
-  <lg-top-bar lgSlot="top" title="Overview" eyebrow="Ashenreach" />
+  <lg-shell-rail>
+    <lg-nav-rail>
+      <lg-nav-section label="Character">
+        <a lgNavItem routerLink="/game/character/character-overview" routerLinkActive ariaCurrentWhenActive="page"
+           icon="overview" description="Stats, vitals, loadout">Overview</a>
+      </lg-nav-section>
+    </lg-nav-rail>
+  </lg-shell-rail>
+  <lg-shell-top><lg-top-bar heading="Aldric Vane" eyebrow="Lv. 42" showMenu /></lg-shell-top>
 
-  <router-outlet />  <!-- default slot = the stage -->
+  <router-outlet />  <!-- the default content = the stage -->
 
-  <lg-chronicle
-    lgSlot="chronicle"
-    [channels]="channels()"
-    [messages]="messages()"
-    [(activeChannel)]="channel"
-    [open]="chatLayout.dockedOpen()"
-    (openChange)="chatLayout.setDockedOpen($event)"
-    (send)="sendMessage($event)"
-  />
+  <lg-shell-chronicle>
+    <lg-chronicle
+      [channels]="channels()"
+      [messages]="messages()"
+      [(activeChannel)]="channel"
+      [open]="chatLayout.dockedOpen()"
+      (openChange)="chatLayout.setDockedOpen($event)"
+      (send)="sendMessage($event)"
+    />
+  </lg-shell-chronicle>
 </lg-game-shell>
 ```
 
@@ -85,14 +93,27 @@ worked example.
 - **Floating:** a drawer the player drags by its grip (arrow keys nudge it 16px) and can stretch with the tall toggle.
   `chroniclePosition` is a two-way model, so the position can be saved.
 
-Custom message rendering (item links, player names) goes in an `ng-template lgChronicleText`:
+Custom message rendering (item links, player names) goes in an `ng-template lgChronicleMessage`, its `message` typed:
 
 ```html
 <lg-chronicle …>
-  <ng-template lgChronicleText let-message>
+  <ng-template lgChronicleMessage let-message>
     <app-chat-message-text [message]="message" />
   </ng-template>
 </lg-chronicle>
+```
+
+### Dialogs, confirmations and toasts
+
+The imperative parts are services (D-145). `LgDialog.open(component)` puts a component whose template is an
+`lg-dialog` over the scrim on the CDK's `Dialog`; `LgDialog.confirm({ heading, text, confirm })` asks before an action
+that spends or can't be undone; `LgToaster.show({ heading, tone })` shows a brief outcome at the top centre of the
+stage, where the GameShell's `lg-toast-outlet` is. Each returns a ref whose `closed` says how it ended:
+
+```ts
+this.dialog.confirm({ heading: 'Spend 400 Soulstones?', confirm: 'Redeem for 400' })
+  .closed.subscribe((yes) => yes && this.redeem());
+this.toaster.show({ heading: 'Nobility active for 30 days', tone: 'success' });
 ```
 
 ## Styles
@@ -101,13 +122,14 @@ Custom message rendering (item links, player names) goes in an `ng-template lgCh
   `angular.json` builds it as its own stylesheet, `grimoire.css` (`bundleName: "grimoire"`, `inject: false`), outside
   the app's first load, and `main.ts` calls `lgLoadStyles(APP_VERSION)` from `core/grimoire-styles.ts`, which adds it
   after `src/styles.css` without blocking the first render, so it wins over Tailwind's preflight (D-096, D-132).
-- A re-shaped part (Panel, Page, PageHeader, Banner, Folio, Notice and Ledger so far, D-136, D-137) is its own box and takes its CSS
+- Every part is its own box, and every part but Heading, Button and Table (D-136 to D-146) takes its CSS
   through `styleUrl` under Angular's default emulated encapsulation: it styles its own template and its host
   (`:host`), never what is projected into it. Its regions carry their few rules in `styles`. Context reaches it through
-  inherited custom properties (`--lg-panel-inset`, `--lg-layout-gap`) or `LG_SHELL`, never a selector from another part.
-- The other part files are still plain global CSS, not attached to their components: selectors still reach from one
-  part into another (`.lg-shell .lg-topbar`), so keep the order in `grimoire.css`. Plan phase 3 moves each file to
-  its component's `styleUrl`, encapsulated, as it re-shapes the component.
+  inherited custom properties (`--lg-panel-inset`, `--lg-layout-gap`, the GameShell regions' `--lg-chronicle-*`), a
+  container query (`@container lg-shell`), or `LG_SHELL`, never a selector from another part.
+- Heading's and Button's CSS stays global, since other parts and screens set their classes on elements of their own;
+  so does the Table's, whose cells are the screen's own markup, and so do the Chronicle's parts a host's composer uses
+  and the legacy region. Keep the order in `grimoire.css`.
 - The root text size follows Grimoire: 16px at Default, 115% and 130% for the larger reading sizes (`src/styles.css`).
   Legacy styles keep their size because the build rebases their rem values by 0.875 (`scripts/postcss-legacy-rem`);
   it leaves everything under `src/app/grimoire/` and the `-grimoire` folders alone (D-096).
@@ -135,7 +157,7 @@ rules the announcer's queue needs. A feature's own spec uses the same harnesses 
 | `core/grimoire-motion.ts` | `LG_MOTION`, `lgMotionMs`, `lgReducedMotion`, live values (`lgLive()`) and live lists (`[lgLiveList]`) |
 | `core/grimoire-ornament.ts` | The ornament budget's warnings (`LG_ORNAMENT_BUDGET`, `lgForbiddenZone`, `lgCheckFramed`, `lgCheckOrnamentRule`) |
 | `core/grimoire-icons.ts` | `LG_ICONS`, `LgIconName`, `LG_ICON_NAMES`, `LG_ICON_MARKERS` (generated) |
-| `core/grimoire-core.ts` | `lgSlot`, `lgCx`, `lgUniqueId`, `LG_RARITY_CODES`, the `LG_SHELL` token |
+| `core/grimoire-core.ts` | `lgCx`, `lgUniqueId`, `LG_RARITY_CODES`, the `LG_SHELL` token |
 | `core/grimoire-styles.ts` | `lgLoadStyles` |
 
 Governance · Code (`design-system/docs/10-governance/04-code.md`) has the conventions, each part's selector, slots and

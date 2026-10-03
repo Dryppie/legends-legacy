@@ -1,0 +1,7 @@
+/* ---------- Icon ----------
+   An icon is its size (its `size`, set as --lg-icon-size), unless a box it sits in fits it to another through
+   --lg-icon-fit (the dense PageHeader's 18px glyph, D-120), and opaque unless the box fades it through --lg-icon-opacity
+   (a not-owned ItemSlot's art, D-139; the NavRail's items). */
+:host { display: inline-block; flex: none; vertical-align: middle; width: var(--lg-icon-fit, var(--lg-icon-size, var(--lg-icon-md))); height: var(--lg-icon-fit, var(--lg-icon-size, var(--lg-icon-md))); }
+:host(.is-missing) { display: none; }
+svg { display: block; width: 100%; height: 100%; opacity: var(--lg-icon-opacity, 1); }

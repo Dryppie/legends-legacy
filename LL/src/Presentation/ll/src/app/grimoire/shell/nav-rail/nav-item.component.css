@@ -1,0 +1,70 @@
+/* ---------- NavRail item ---------- */
+:host {
+  position: relative;
+  display: flex; align-items: center; gap: var(--lg-space-3);
+  min-height: 1.875rem; padding: 0 0.625rem;
+  border-radius: var(--lg-radius-container);
+  color: var(--lg-ink-muted); text-decoration: none; white-space: nowrap;
+  font-family: var(--lg-font-ui); font-size: var(--lg-text-nav); line-height: var(--lg-leading-nav); font-weight: 500; letter-spacing: var(--lg-tracking-nav); text-transform: uppercase;
+  isolation: isolate;
+  --lg-rail-icon: var(--lg-gilt);
+}
+/* The rail's icons are gilt at rest as well as when current (D-105): the game's sidebar has always drawn them in gold.
+   The current location is still told by the bar, the weight and ink; a locked item's icon steps back with its title. */
+lg-icon { color: var(--lg-rail-icon); --lg-icon-opacity: 0.85; }
+.lg-rail__text { display: grid; min-width: 0; }
+.lg-rail__desc {
+  overflow: hidden; text-overflow: ellipsis;
+  font-family: var(--lg-font-ui); font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); font-weight: 400; letter-spacing: 0; text-transform: none;
+  color: var(--lg-ink-muted);
+}
+:host(.has-description) { min-height: 2.75rem; padding-top: var(--lg-space-1); padding-bottom: var(--lg-space-1); }
+:host(.is-locked) { --lg-rail-icon: var(--lg-ink-disabled); }
+:host(.is-locked) .lg-rail__desc { color: var(--lg-ink-disabled); }
+/* Feedback: the hover wash is a layer that fades over duration-fast; the title turns ink at once. The current location
+   (the current item, its wash and its bar) moves at once, like any change of place. */
+:host::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; border-radius: inherit;
+  background: var(--lg-surface-raised); opacity: 0; transition: opacity var(--lg-duration-fast) var(--lg-ease-standard);
+}
+:host(:hover) { color: var(--lg-ink); }
+:host(:hover)::after { opacity: 1; }
+:host([aria-current='page']) {
+  color: var(--lg-rail-active-ink); background: var(--lg-rail-active-bg);
+  font-family: var(--lg-rail-active-family);
+  font-weight: 600;
+}
+:host([aria-current='page']) lg-icon { --lg-icon-opacity: 1; }
+/* …and a 2px gilt bar at its start, as the game's sidebar always marked where you are (D-118). */
+:host([aria-current='page'])::before {
+  content: ""; position: absolute; left: 0; top: var(--lg-space-2); bottom: var(--lg-space-2); width: 2px;
+  border-radius: var(--lg-radius-control); background: var(--lg-gilt);
+}
+:host(.is-locked) { color: var(--lg-ink-disabled); cursor: not-allowed; }
+/* Locked stays in the Tab order (Standards · States): no hover wash, the lock where the badge goes, and the unlock
+   condition in the reason tip beside the item. */
+:host(.is-locked:hover) { color: var(--lg-ink-disabled); }
+:host(.is-locked)::after { display: none; }
+/* The word is set small and in sentence case so it fits beside a long title; the 12px lock marker replaces it once drawn. */
+.lg-rail__lock { flex: none; margin-left: auto; font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--lg-ink-muted); }
+:host(.is-locked) .lg-rail__title { min-width: 0; }
+.lg-rail__badge {
+  margin-left: auto; min-width: 1.125rem; height: 1.125rem; padding: 0 0.3125rem;
+  display: grid; place-items: center; border-radius: var(--lg-radius-control);
+  background: var(--lg-arcana-soft); color: var(--lg-arcana);
+  font-family: var(--lg-font-ui); font-size: var(--lg-text-caption); line-height: var(--lg-leading-mark); font-weight: 600; letter-spacing: 0; text-shadow: none;
+}
+.lg-rail__attention { margin-left: auto; }
+.lg-rail__title { overflow: hidden; text-overflow: ellipsis; }
+/* Compact (D-115, D-119): the icon alone, centred, 44px tall across the rail; the title stays the item's name, read
+   but not shown, and the description goes. A count is a small mark pinned to the icon's corner, ringed off from it,
+   rather than a tile at the rail's edge; the diamond sits on the item's top end corner. */
+:host(.is-compact) { justify-content: center; padding: 0; width: 100%; min-height: 2.75rem; }
+:host(.is-compact) .lg-rail__text { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+:host(.is-compact) .lg-rail__desc { display: none; }
+:host(.is-compact) .lg-rail__badge {
+  position: absolute; top: 0.125rem; left: calc(50% + 0.25rem); right: auto; margin: 0;
+  min-width: 1rem; height: 1rem; padding: 0 0.25rem; box-shadow: 0 0 0 2px var(--lg-surface-solid);
+}
+:host(.is-compact) .lg-rail__lock { display: none; }
+:host(.is-compact) .lg-rail__attention { position: absolute; top: 0; right: 0; }

@@ -4,10 +4,12 @@ import { ChangeDetectionStrategy, Component, booleanAttribute, computed, input }
 @Component({
   selector: 'lg-presence',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: 'display: contents' },
-  template: `<span [class]="online() ? 'lg-presence is-online' : 'lg-presence is-offline'" [attr.title]="tooltip()"
-    ><span class="lg-presence__dot" aria-hidden="true"></span>{{ text() }}</span
-  >`,
+  host: {
+    '[class]': "online() ? 'lg-presence is-online' : 'lg-presence is-offline'",
+    '[attr.title]': 'tooltip()',
+  },
+  template: `<span class="lg-presence__dot" aria-hidden="true"></span>{{ text() }}`,
+  styleUrl: './presence.component.css',
 })
 export class LgPresenceComponent {
   readonly online = input.required<boolean>();

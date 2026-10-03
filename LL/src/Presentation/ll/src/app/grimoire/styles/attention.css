@@ -2,5 +2,3 @@
    The arcana-glow diamond for Ready and Claimable: icon-marker (12px) across, in a fixed place on each part. */
 .lg-attention { display: inline-grid; place-items: center; flex: none; width: var(--lg-icon-marker); height: var(--lg-icon-marker); }
 .lg-attention::before { content: ""; width: calc(var(--lg-icon-marker) * 0.7071); height: calc(var(--lg-icon-marker) * 0.7071); transform: rotate(45deg); background: var(--lg-arcana-glow); }
-.lg-rail__attention { margin-left: auto; }
-.lg-rail--compact .lg-rail__attention { position: absolute; top: 0; right: 0; }

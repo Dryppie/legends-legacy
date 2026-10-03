@@ -1,14 +1,14 @@
 /* ---------- Objective (the pinned quest in the TopBar's centre, D-110) ----------
-   One line of now: the kicker and quest title, then the current objective and its count. A disclosure when it holds the
-   full tracker: the panel is a Level 2 floating surface beneath it, at z-popover. */
-.lg-objective { position: relative; min-width: 0; }
+   One line of now: the kicker and quest title, then the current objective and its count. A button when it holds the
+   full tracker, which opens in a Popover beneath it (D-146). */
+:host { display: block; position: relative; min-width: 0; }
 .lg-objective__summary {
   display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; column-gap: var(--lg-space-2); width: 100%;
   margin: 0; padding: var(--lg-space-1) var(--lg-space-3); border: var(--lg-border-hairline) solid transparent; border-radius: var(--lg-radius-control);
   background: none; color: var(--lg-ink); font: inherit; text-align: left;
 }
 button.lg-objective__summary { cursor: pointer; border-color: var(--lg-line); }
-button.lg-objective__summary:hover, .lg-objective.is-open button.lg-objective__summary { background: var(--lg-surface-raised); border-color: var(--lg-line-strong); }
+button.lg-objective__summary:hover, :host(.is-open) button.lg-objective__summary { background: var(--lg-surface-raised); border-color: var(--lg-line-strong); }
 button.lg-objective__summary:focus-visible { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); }
 .lg-objective__kicker { font-size: var(--lg-text-label); line-height: var(--lg-leading-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ink-muted); white-space: nowrap; }
 .lg-objective__title { grid-column: 2; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact); font-weight: 600; }
@@ -16,10 +16,3 @@ button.lg-objective__summary:focus-visible { outline: 2px solid transparent; box
 .lg-objective__line { grid-column: 1 / -1; display: flex; gap: var(--lg-space-2); min-width: 0; font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); }
 .lg-objective__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lg-objective__count { flex: none; margin-left: auto; color: var(--lg-ink); font-variant-numeric: tabular-nums lining-nums; }
-.lg-objective__panel {
-  position: absolute; top: calc(100% + var(--lg-space-1)); left: 50%; z-index: var(--lg-z-popover);
-  width: min(26.25rem, 90vw); max-height: 70vh; overflow: auto; transform: translateX(-50%);
-  padding: var(--lg-inset-md); border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-float);
-  background: var(--lg-surface-raised); box-shadow: var(--lg-shadow-float);
-}
-.lg-objective__panel { animation: lg-enter var(--lg-duration-base) var(--lg-ease-enter) both; }

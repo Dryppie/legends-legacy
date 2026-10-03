@@ -11,23 +11,18 @@ export type LgDeltaPolarity = 'better' | 'worse' | 'neutral';
 @Component({
   selector: 'lg-delta',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: 'display: contents' },
-  template: `
-    <span [class]="'lg-delta lg-delta--' + polarity() + (extraClass() ? ' ' + extraClass() : '')"
-      >@if (glyph()) {<span class="lg-delta__glyph" aria-hidden="true">{{ glyph() }}</span
-        >}<span class="lg-delta__value"
-        >@if (glyph()) {{{ sign() }}} @else {<span aria-hidden="true">{{ sign() }}</span>}{{ value() }}</span
-      >@if (word()) {<span class="lg-sr">, {{ word() }}</span>}</span
-    >
-  `,
+  host: { '[class]': "'lg-delta lg-delta--' + polarity()" },
+  template: `@if (glyph()) {<span class="lg-delta__glyph" aria-hidden="true">{{ glyph() }}</span
+      >}<span class="lg-delta__value"
+      >@if (glyph()) {{{ sign() }}} @else {<span aria-hidden="true">{{ sign() }}</span>}{{ value() }}</span
+    >@if (word()) {<span class="lg-sr">, {{ word() }}</span>}`,
+  styleUrl: './delta.component.css',
 })
 export class LgDeltaComponent {
   readonly direction = input.required<LgDeltaDirection>();
   /** The size of the change, formatted, without a sign: "12%", "1.2s", "0". */
   readonly value = input.required<string | number>();
   readonly polarity = input.required<LgDeltaPolarity>();
-  /** A class for the inner element, to place it in a layout of the caller's. */
-  readonly extraClass = input<string>();
 
   protected readonly glyph = computed(() =>
     this.direction() === 'up' ? '▲' : this.direction() === 'down' ? '▼' : null,

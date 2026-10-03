@@ -10,43 +10,23 @@ import {
   LgChronicleComponent,
   LgChronicleMessage,
 } from '../chronicle/chronicle.component';
-import { LgGameShellComponent } from './game-shell.component';
-import { LgChroniclePosition, LgSlotDirective } from '../../core/grimoire-core';
+import {
+  LgGameShellComponent,
+  LgShellChronicleComponent,
+  LgShellRailComponent,
+  LgShellTopComponent,
+} from './game-shell.component';
+import { LgChroniclePosition } from '../../core/grimoire-core';
 import { Overlay } from '@angular/cdk/overlay';
 import { DomPortal } from '@angular/cdk/portal';
 import {
+  LgNavItemComponent,
   LgNavRailComponent,
-  LgNavSection,
+  LgNavSectionComponent,
 } from '../nav-rail/nav-rail.component';
 import { LgTopBarComponent } from '../top-bar/top-bar.component';
 
 // The data the parity cases used (D-130), before the parity check was retired.
-const NAV: LgNavSection[] = [
-  {
-    label: 'Character',
-    items: [
-      { id: 'overview', title: 'Overview', icon: 'overview' },
-      {
-        id: 'inventory',
-        title: 'Inventory',
-        icon: 'inventory',
-        badge: 3,
-        badgeLabel: '3 new items',
-      },
-      {
-        id: 'essences',
-        title: 'Essences',
-        icon: 'essences',
-        locked: true,
-        reason: 'Unlocks at level 20',
-      },
-    ],
-  },
-  {
-    label: 'City',
-    items: [{ id: 'guild', title: 'Guild', icon: 'guild', href: '/guild' }],
-  },
-];
 const CHANNELS: LgChronicleChannel[] = [
   { id: 'all', label: 'All' },
   { id: 'general', label: 'General', unread: 2 },
@@ -90,28 +70,57 @@ const MESSAGES: LgChronicleMessage[] = [
 @Component({
   imports: [
     LgGameShellComponent,
+    LgShellRailComponent,
+    LgShellTopComponent,
     LgNavRailComponent,
+    LgNavSectionComponent,
+    LgNavItemComponent,
     LgTopBarComponent,
-    LgSlotDirective,
   ],
   template: `
     <div style="width: 800px">
       <lg-game-shell [height]="500">
-        <lg-nav-rail lgSlot="rail" [sections]="nav" activeId="overview" />
-        <lg-top-bar lgSlot="top" title="Aldric" showMenu />
+        <lg-shell-rail>
+          <lg-nav-rail>
+            <lg-nav-section label="Character">
+              <a lgNavItem href="#" aria-current="page" icon="overview"
+                >Overview</a
+              >
+              <a
+                lgNavItem
+                href="#"
+                icon="inventory"
+                [badge]="3"
+                badgeLabel="3 new items"
+                >Inventory</a
+              >
+              <a lgNavItem locked reason="Unlocks at level 20" icon="essences"
+                >Essences</a
+              >
+            </lg-nav-section>
+            <lg-nav-section label="City">
+              <a lgNavItem href="/guild" icon="guild">Guild</a>
+            </lg-nav-section>
+          </lg-nav-rail>
+        </lg-shell-rail>
+        <lg-shell-top>
+          <lg-top-bar heading="Aldric" showMenu />
+        </lg-shell-top>
         <p>Stage</p>
       </lg-game-shell>
     </div>
   `,
 })
-class NarrowShellHost {
-  readonly nav = NAV;
-}
+class NarrowShellHost {}
 
 // The parity case i-shell-floating: a 1200px-wide shell with the floating Chronicle drawer. Its position is bound
 // two-way here, as a game persists it.
 @Component({
-  imports: [LgGameShellComponent, LgChronicleComponent, LgSlotDirective],
+  imports: [
+    LgGameShellComponent,
+    LgShellChronicleComponent,
+    LgChronicleComponent,
+  ],
   template: `
     <div style="width: 1200px">
       <lg-game-shell
@@ -119,12 +128,13 @@ class NarrowShellHost {
         chatLayout="floating"
         [(chroniclePosition)]="position"
       >
-        <lg-chronicle
-          lgSlot="chronicle"
-          [channels]="channels"
-          [messages]="messages"
-          [composer]="false"
-        />
+        <lg-shell-chronicle>
+          <lg-chronicle
+            [channels]="channels"
+            [messages]="messages"
+            [composer]="false"
+          />
+        </lg-shell-chronicle>
         <p>Stage</p>
       </lg-game-shell>
     </div>
@@ -164,6 +174,14 @@ describe('LgGameShellComponent', () => {
       expect(await shell.isStageInert()).toBeTrue();
       expect(await shell.getFocusedRailItem()).toBe('Overview');
       expect(await topBar.isMenuFocused()).toBeFalse();
+    });
+
+    it('holds focus while open: Tab past its last item comes back to its first', async () => {
+      await topBar.pressMenu();
+      await shell.tabPastRail();
+
+      expect(await shell.getFocusedRailItem()).toBe('Overview');
+      expect(await shell.isRailOpen()).toBeTrue();
     });
 
     it('Escape closes the drawer and returns focus to the menu button', async () => {

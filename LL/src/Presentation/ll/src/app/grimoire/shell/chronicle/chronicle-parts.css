@@ -1,0 +1,67 @@
+/* ---------- Chronicle parts ----------
+   Global: the Chronicle's own template uses them, and so may a host's lg-chronicle-aside and lg-chronicle-composer
+   (D-112), whose content the Chronicle's encapsulated styles can't reach. */
+.lg-ch--all, .lg-ch--general { --lg-ch: var(--lg-channel-general); }
+.lg-ch--trade { --lg-ch: var(--lg-channel-trade); }
+.lg-ch--help { --lg-ch: var(--lg-channel-help); }
+.lg-ch--guild { --lg-ch: var(--lg-channel-guild); }
+.lg-ch--whisper { --lg-ch: var(--lg-channel-whisper); }
+.lg-ch--raid { --lg-ch: var(--lg-channel-raid); }
+.lg-ch--invites { --lg-ch: var(--lg-channel-invites); }
+.lg-ch--system { --lg-ch: var(--lg-channel-system); }
+.lg-ch--loot { --lg-ch: var(--lg-channel-loot); }
+
+/* A quiet icon button in the head: the Chronicle's collapse, tall and drag controls, and an aside's settings button. */
+.lg-chronicle__toggle {
+  display: grid; place-items: center; flex: none; width: 2rem; height: 2rem;
+  border: 0; border-radius: var(--lg-radius-control); background: none; color: var(--lg-ink-muted); cursor: pointer;
+}
+.lg-chronicle__toggle:hover { color: var(--lg-ink); background: var(--lg-surface-raised); }
+.lg-chronicle__toggle:focus-visible { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); }
+
+/* A @mention in a line's text (an lgChronicleMessage template). */
+.lg-chronicle__line .lg-mention { font-weight: 700; color: var(--lg-ink); }
+
+/* The composer: the built-in form, or an lg-chronicle-composer. Opened by the player, it rises in with the log's body. */
+.lg-chronicle__composer { display: flex; align-items: center; gap: var(--lg-space-2); flex: none; padding: var(--lg-space-1) var(--lg-space-3) var(--lg-space-3) var(--lg-space-5); }
+.lg-chronicle.is-entering .lg-chronicle__composer { animation: lg-enter var(--lg-duration-base) var(--lg-ease-enter) both; }
+.lg-chronicle__prefix {
+  flex: none; display: inline-flex; align-items: center; height: 1.375rem; padding: 0 0.375rem;
+  border: var(--lg-border-hairline) solid currentColor; border-radius: var(--lg-radius-control);
+  font-size: var(--lg-text-label); font-weight: 600; letter-spacing: var(--lg-tracking-caps); text-transform: uppercase; color: var(--lg-ch);
+}
+.lg-chronicle__input {
+  flex: 1; min-width: 0; height: 2.125rem; padding: 0 var(--lg-space-4);
+  border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-control);
+  background: var(--lg-surface-raised); color: var(--lg-ink);
+  font: inherit; font-size: var(--lg-text-body-compact);
+}
+.lg-chronicle__input { background: var(--lg-ground-deep); }
+.lg-chronicle__input::placeholder { color: var(--lg-ink-muted); }
+.lg-chronicle__input:focus-visible { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); }
+.lg-chronicle__send { display: grid; place-items: center; flex: none; margin: 0; padding: 0.25rem; border: 0; background: none; cursor: pointer; }
+.lg-chronicle__send:focus-visible { outline: 2px solid transparent; box-shadow: var(--lg-focus-ring); border-radius: var(--lg-radius-control); }
+
+/* A composer of the host's own (D-112): it takes the composer's place and may use its parts — the prefix, the input
+   (an <input> or a contenteditable editor) and the send key — with these: a note and an error line under it, a
+   character count, and the @mention suggestions, a Level 2 floating listbox above the input. */
+.lg-chronicle__composer--custom { display: block; }
+.lg-chronicle__composer--custom > * { min-width: 0; }
+.lg-chronicle__row { display: flex; align-items: center; gap: var(--lg-space-2); min-width: 0; }
+.lg-chronicle__input[contenteditable] { display: block; height: auto; min-height: 2.125rem; max-height: 6rem; overflow-y: auto; padding-top: var(--lg-space-2); padding-bottom: var(--lg-space-2); white-space: pre-wrap; overflow-wrap: anywhere; line-height: var(--lg-leading-body-compact); }
+.lg-chronicle__input[contenteditable]:empty::before { content: attr(data-placeholder); color: var(--lg-ink-muted); pointer-events: none; }
+.lg-chronicle__input[aria-disabled="true"], .lg-chronicle__input:disabled { color: var(--lg-ink-disabled); cursor: not-allowed; }
+.lg-chronicle__note, .lg-chronicle__error { margin: var(--lg-space-1) 0 0; font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); }
+.lg-chronicle__error { color: var(--lg-danger); }
+.lg-chronicle__note a { color: var(--lg-ink); text-decoration: underline; text-underline-offset: 0.15em; }
+.lg-chronicle__count { font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); font-variant-numeric: tabular-nums lining-nums; }
+.lg-chronicle__count.is-over { color: var(--lg-danger); }
+.lg-chronicle__suggest {
+  min-width: 12rem; max-height: 14rem; overflow: auto; margin: 0; padding: var(--lg-space-1); list-style: none;
+  background: var(--lg-surface-raised); border: var(--lg-border-hairline) solid var(--lg-line-strong); border-radius: var(--lg-radius-float); box-shadow: var(--lg-shadow-float);
+  font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact-row);
+}
+.lg-chronicle__option { padding: 0.375rem var(--lg-space-3); border-radius: var(--lg-radius-container); color: var(--lg-ink); cursor: pointer; }
+.lg-chronicle__option:hover, .lg-chronicle__option.is-active { background: var(--lg-surface-solid); box-shadow: inset var(--lg-border-emphasis) 0 0 var(--lg-ink); }
+.lg-chronicle__status { padding: 0.375rem var(--lg-space-3); color: var(--lg-ink-muted); }
+.lg-chronicle__online { font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); white-space: nowrap; }

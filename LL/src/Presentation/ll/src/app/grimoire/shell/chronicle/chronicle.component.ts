@@ -3,13 +3,14 @@ import {
   Component,
   Directive,
   ElementRef,
+  Signal,
   TemplateRef,
   afterRenderEffect,
   booleanAttribute,
   computed,
   contentChild,
-  contentChildren,
   effect,
+  forwardRef,
   inject,
   input,
   model,
@@ -19,10 +20,11 @@ import {
   viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { LG_SHELL, LgSlotDirective, lgCx, lgHasSlot } from '../../core/grimoire-core';
+import { LG_SHELL, lgCx } from '../../core/grimoire-core';
 import { LgButtonComponent } from '../../primitives/button/button.component';
 import { LgAnnouncer } from '../../core/grimoire-announcer';
 import { LgIconComponent } from '../../primitives/icon/icon.component';
+import { LgKeyComponent } from '../../primitives/key/key.component';
 
 export interface LgChronicleChannel {
   /** 'all' shows the merged feed of visible channels. */
@@ -50,21 +52,66 @@ export interface LgChronicleMessage {
   text: string;
 }
 
-export interface LgChronicleTextContext {
+export interface LgChronicleMessageContext {
   $implicit: LgChronicleMessage;
 }
 
 /**
- * Custom rendering for a message's text (mentions, item links):
- * `<ng-template lgChronicleText let-message>…</ng-template>`
+ * Draws a line's text your way (item links, @mentions), with the message typed:
+ * `<ng-template lgChronicleMessage let-message>…</ng-template>`. The time, the channel tag and the author stay the
+ * Chronicle's.
  */
-@Directive({ selector: 'ng-template[lgChronicleText]' })
-export class LgChronicleTextDirective {
-  readonly template = inject<TemplateRef<LgChronicleTextContext>>(TemplateRef);
-  static ngTemplateContextGuard(_directive: LgChronicleTextDirective, context: unknown): context is LgChronicleTextContext {
+@Directive({ selector: 'ng-template[lgChronicleMessage]' })
+export class LgChronicleMessageDirective {
+  readonly template = inject<TemplateRef<LgChronicleMessageContext>>(TemplateRef);
+  static ngTemplateContextGuard(
+    _directive: LgChronicleMessageDirective,
+    context: unknown,
+  ): context is LgChronicleMessageContext {
     return true;
   }
 }
+
+/** What a Chronicle tells its regions: whether it is open. */
+export abstract class LgChronicleRef {
+  abstract readonly open: Signal<boolean>;
+}
+
+/**
+ * The Chronicle's aside, beside the channel tabs: channel settings and the online count. It may use the Chronicle's
+ * parts: `lg-chronicle__toggle` for an icon button and `lg-chronicle__online` for the count; the settings themselves
+ * are a Popover of Checkboxes (D-146).
+ */
+@Component({
+  selector: 'lg-chronicle-aside',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'lg-chronicle__aside', '[class.is-collapsed]': '!chronicle?.open()' },
+  template: '<ng-content />',
+  styles: `
+    :host { display: flex; align-items: center; gap: var(--lg-space-2); flex: none; }
+    /* Collapsed to the docked vertical strip, the Chronicle is its label alone. */
+    @container (max-width: 7.5rem) {
+      :host(.is-collapsed) { display: none; }
+    }
+  `,
+})
+export class LgChronicleAsideComponent {
+  protected readonly chronicle = inject(LgChronicleRef, { optional: true });
+}
+
+/**
+ * A composer of your own (D-112), in the built-in one's place while the Chronicle is open. It may use the Chronicle's
+ * parts: `lg-chronicle__row`, `-prefix` (with an `lg-ch--<channel>` class), `-input` (an `<input>` or a contenteditable
+ * editor), `-send`, and under the row `-note`, `-error` and `-count`; `-suggest`, `-option` and `-status` for the
+ * @mention suggestions, a Level 2 floating listbox above the input.
+ */
+@Component({
+  selector: 'lg-chronicle-composer',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'lg-chronicle__composer lg-chronicle__composer--custom' },
+  template: '<ng-content />',
+})
+export class LgChronicleComposerComponent {}
 
 function channelClass(id: string | undefined): string {
   return 'lg-ch--' + String(id || 'general').toLowerCase();
@@ -74,13 +121,20 @@ function channelClass(id: string | undefined): string {
  * Chat and the game log. Inside a GameShell it follows the shell's chat layout (docked, or a floating drawer with a
  * drag grip and a tall toggle). Live updates never move what the player is reading: the log follows the newest line
  * only while the player is at its foot; scrolled up, it keeps their place and counts what arrived. Channel settings go
- * in `lgSlot="aside"`.
+ * in an `lg-chronicle-aside`, a composer of your own in an `lg-chronicle-composer`, and a line's text your way in an
+ * `<ng-template lgChronicleMessage let-message>`.
  */
 @Component({
   selector: 'lg-chronicle',
-  imports: [NgTemplateOutlet, LgButtonComponent, LgIconComponent],
+  imports: [NgTemplateOutlet, LgButtonComponent, LgIconComponent, LgKeyComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: 'display: contents' },
+  providers: [{ provide: LgChronicleRef, useExisting: forwardRef(() => LgChronicleComponent) }],
+  host: {
+    role: 'region',
+    '[class]': 'classes()',
+    '[attr.aria-label]': "label() || 'Chronicle'",
+    '(animationend)': 'onAnimationEnd($event)',
+  },
   template: `
     <ng-template #line let-m let-compact="compact" let-showTag="showTag"
       >@if (m.kind === 'day') {<span class="lg-chronicle__text">{{ m.text }}</span>} @else {@if (m.time && !compact) {<time class="lg-chronicle__time">{{ m.time }}</time>}@if (
@@ -101,137 +155,134 @@ function channelClass(id: string | undefined): string {
       >}</ng-template
     >
 
-    <section [class]="classes()" [attr.aria-label]="label() || 'Chronicle'" (animationend)="onAnimationEnd($event)">
-      <header class="lg-chronicle__head">
-        @if (open()) {
-          <div class="lg-chronicle__channels" role="tablist" aria-label="Channels" (keydown)="onChannelKeydown($event)">
-            @for (channel of channels(); track channel.id) {
-              <button
-                type="button"
-                role="tab"
-                [attr.aria-selected]="channel.id === current()"
-                [attr.tabindex]="channel.id === current() ? 0 : -1"
-                [class]="channelTabClass(channel.id)"
-                (click)="activeChannel.set(channel.id)"
-              >{{ channel.label }}@if (channel.unread) {<span class="lg-chronicle__unread" [attr.aria-label]="channel.unread + ' unread'">{{
-                    channel.unread
-                  }}</span>}</button>
-            }
-          </div>
-        } @else {
-          <button
-            type="button"
-            [class]="tickerClass()"
-            [attr.aria-label]="'Open chat' + (unreadTotal() ? ', ' + unreadTotal() + ' unread' : '')"
-            (click)="open.set(true)"
-          >
-            @if (lastMessage(); as last) {
-              <ng-container [ngTemplateOutlet]="line" [ngTemplateOutletContext]="{ $implicit: last, compact: true, showTag: true }" />
-            } @else {
-              <span class="lg-chronicle__text">Chronicle</span>
-            }
-            <span class="lg-chronicle__strip-label" aria-hidden="true">{{ label() || 'Chronicle' }}</span>
-            @if (unreadTotal()) {
-              <span class="lg-chronicle__unread" aria-hidden="true">{{ unreadTotal() }}</span>
-            }
-          </button>
-        }
-        @if (has('aside')) {
-          <div class="lg-chronicle__aside"><ng-content select="[lgSlot=aside]" /></div>
-        }
-        @if (open() && isFloating()) {
-          <button
-            type="button"
-            class="lg-chronicle__toggle lg-chronicle__tall"
-            [attr.aria-pressed]="tall()"
-            [attr.aria-label]="tall() ? 'Make chat shorter' : 'Make chat taller'"
-            (click)="tall.set(!tall())"
-          >
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path [attr.d]="tall() ? 'M8 4l4 4 4-4M8 20l4-4 4 4' : 'M8 8l4-4 4 4M8 16l4 4 4-4'" />
-            </svg>
-          </button>
-        }
-        @if (isFloating() && shell) {
-          <button
-            type="button"
-            class="lg-chronicle__toggle lg-chronicle__grip"
-            aria-label="Drag chat"
-            title="Drag to move · arrow keys nudge"
-            (pointerdown)="shell.startChronicleDrag($event)"
-            (keydown)="shell.nudgeChronicle($event)"
-          >
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
-              <circle cx="9" cy="6" r="1.4" /><circle cx="15" cy="6" r="1.4" /><circle cx="9" cy="12" r="1.4" /><circle
-                cx="15"
-                cy="12"
-                r="1.4"
-              /><circle cx="9" cy="18" r="1.4" /><circle cx="15" cy="18" r="1.4" />
-            </svg>
-          </button>
-        }
-        @if (toggleable()) {
-          <button
-            type="button"
-            class="lg-chronicle__toggle"
-            [attr.aria-expanded]="open()"
-            [attr.aria-label]="open() ? 'Collapse chat' : 'Expand chat'"
-            (click)="open.set(!open())"
-          >
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path [attr.d]="open() ? 'M6 9l6 6 6-6' : 'M6 15l6-6 6 6'" />
-            </svg>
-          </button>
-        }
-      </header>
+    <header class="lg-chronicle__head">
       @if (open()) {
-        <div class="lg-chronicle__body">
-          <ol
-            #log
-            class="lg-chronicle__log"
-            [attr.aria-live]="announce() === 'all' ? 'polite' : 'off'"
-            aria-relevant="additions"
-            tabindex="0"
-            aria-label="Messages"
-            (scroll)="onLogScroll()"
-          >
-            @for (m of visible(); track m.id) {
-              <li [attr.data-id]="m.id" [class]="lineClass(m)">
-                <ng-container
-                  [ngTemplateOutlet]="line"
-                  [ngTemplateOutletContext]="{ $implicit: m, compact: false, showTag: current() === 'all' || m.channel !== current() }"
-                />
-              </li>
-            }
-          </ol>
-          @if (newCount()) {
-            <button lgButton size="sm" class="lg-chronicle__jump" [attr.aria-label]="newLabel() + ', jump to latest'" (click)="jump()">
-              {{ newLabel() }}
-            </button>
+        <div class="lg-chronicle__channels" role="tablist" aria-label="Channels" (keydown)="onChannelKeydown($event)">
+          @for (channel of channels(); track channel.id) {
+            <button
+              type="button"
+              role="tab"
+              [attr.aria-selected]="channel.id === current()"
+              [attr.tabindex]="channel.id === current() ? 0 : -1"
+              [class]="channelTabClass(channel.id)"
+              (click)="activeChannel.set(channel.id)"
+            >{{ channel.label }}@if (channel.unread) {<span class="lg-chronicle__unread" [attr.aria-label]="channel.unread + ' unread'">{{
+                  channel.unread
+                }}</span>}</button>
           }
         </div>
+      } @else {
+        <button
+          type="button"
+          [class]="tickerClass()"
+          [attr.aria-label]="'Open chat' + (unreadTotal() ? ', ' + unreadTotal() + ' unread' : '')"
+          (click)="open.set(true)"
+        >
+          @if (lastMessage(); as last) {
+            <ng-container [ngTemplateOutlet]="line" [ngTemplateOutletContext]="{ $implicit: last, compact: true, showTag: true }" />
+          } @else {
+            <span class="lg-chronicle__text">Chronicle</span>
+          }
+          <span class="lg-chronicle__strip-label" aria-hidden="true">{{ label() || 'Chronicle' }}</span>
+          @if (unreadTotal()) {
+            <span class="lg-chronicle__unread" aria-hidden="true">{{ unreadTotal() }}</span>
+          }
+        </button>
       }
-      @if (open() && has('composer')) {
-        <div class="lg-chronicle__composer lg-chronicle__composer--custom"><ng-content select="[lgSlot=composer]" /></div>
-      } @else if (open() && composer()) {
-        <form class="lg-chronicle__composer" (submit)="submit($event)">
-          <span [class]="'lg-chronicle__prefix ' + prefixClass()">{{ composerChannelLabel() || composerChannel() || current() }}</span>
-          <input
-            class="lg-chronicle__input"
-            [value]="draft() || ''"
-            [attr.value]="draft() || ''"
-            [attr.maxlength]="maxLength() ?? null"
-            (input)="draft.set($any($event.target).value)"
-            [attr.placeholder]="placeholder() || 'Say something — /g guild, /w name whisper'"
-            aria-label="Chat message"
-          />
-          <button type="submit" class="lg-chronicle__send" aria-label="Send"><kbd class="lg-key">↵</kbd></button>
-        </form>
+      <ng-content select="lg-chronicle-aside" />
+      @if (open() && isFloating()) {
+        <button
+          type="button"
+          class="lg-chronicle__toggle lg-chronicle__tall"
+          [attr.aria-pressed]="tall()"
+          [attr.aria-label]="tall() ? 'Make chat shorter' : 'Make chat taller'"
+          (click)="tall.set(!tall())"
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path [attr.d]="tall() ? 'M8 4l4 4 4-4M8 20l4-4 4 4' : 'M8 8l4-4 4 4M8 16l4 4 4-4'" />
+          </svg>
+        </button>
       }
-    </section>
+      @if (isFloating() && shell) {
+        <button
+          type="button"
+          class="lg-chronicle__toggle lg-chronicle__grip"
+          aria-label="Drag chat"
+          title="Drag to move · arrow keys nudge"
+          (pointerdown)="shell.startChronicleDrag($event)"
+          (keydown)="shell.nudgeChronicle($event)"
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+            <circle cx="9" cy="6" r="1.4" /><circle cx="15" cy="6" r="1.4" /><circle cx="9" cy="12" r="1.4" /><circle
+              cx="15"
+              cy="12"
+              r="1.4"
+            /><circle cx="9" cy="18" r="1.4" /><circle cx="15" cy="18" r="1.4" />
+          </svg>
+        </button>
+      }
+      @if (toggleable()) {
+        <button
+          type="button"
+          class="lg-chronicle__toggle lg-chronicle__collapse"
+          [attr.aria-expanded]="open()"
+          [attr.aria-label]="open() ? 'Collapse chat' : 'Expand chat'"
+          (click)="open.set(!open())"
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path [attr.d]="open() ? 'M6 9l6 6 6-6' : 'M6 15l6-6 6 6'" />
+          </svg>
+        </button>
+      }
+    </header>
+    @if (open()) {
+      <div class="lg-chronicle__body">
+        <ol
+          #log
+          class="lg-chronicle__log"
+          [attr.aria-live]="announce() === 'all' ? 'polite' : 'off'"
+          aria-relevant="additions"
+          tabindex="0"
+          aria-label="Messages"
+          (scroll)="onLogScroll()"
+        >
+          @for (m of visible(); track m.id) {
+            <li [attr.data-id]="m.id" [class]="lineClass(m)">
+              <ng-container
+                [ngTemplateOutlet]="line"
+                [ngTemplateOutletContext]="{ $implicit: m, compact: false, showTag: current() === 'all' || m.channel !== current() }"
+              />
+            </li>
+          }
+        </ol>
+        @if (newCount()) {
+          <button lgButton size="sm" class="lg-chronicle__jump" [attr.aria-label]="newLabel() + ', jump to latest'" (click)="jump()">
+            {{ newLabel() }}
+          </button>
+        }
+      </div>
+    }
+    @if (open() && customComposer()) {
+      <ng-content select="lg-chronicle-composer" />
+    } @else if (open() && composer()) {
+      <form class="lg-chronicle__composer" (submit)="submit($event)">
+        <span [class]="'lg-chronicle__prefix ' + prefixClass()">{{ composerChannelLabel() || composerChannel() || current() }}</span>
+        <input
+          class="lg-chronicle__input"
+          [value]="draft() || ''"
+          [attr.value]="draft() || ''"
+          [attr.maxlength]="maxLength() ?? null"
+          (input)="draft.set($any($event.target).value)"
+          [attr.placeholder]="placeholder() || 'Say something — /g guild, /w name whisper'"
+          aria-label="Chat message"
+        />
+        <button type="submit" class="lg-chronicle__send" aria-label="Send"><kbd lgKey>↵</kbd></button>
+      </form>
+    }
   `,
+  styleUrl: './chronicle.component.css',
 })
-export class LgChronicleComponent {
+export class LgChronicleComponent implements LgChronicleRef {
   readonly channels = input.required<readonly LgChronicleChannel[]>();
   readonly messages = input.required<readonly LgChronicleMessage[]>();
   readonly activeChannel = model<string>();
@@ -264,8 +315,8 @@ export class LgChronicleComponent {
 
   protected readonly shell = inject(LG_SHELL, { optional: true });
   private readonly announcer = inject(LgAnnouncer);
-  private readonly slots = contentChildren(LgSlotDirective);
-  protected readonly textTemplate = contentChild(LgChronicleTextDirective);
+  protected readonly textTemplate = contentChild(LgChronicleMessageDirective);
+  protected readonly customComposer = contentChild(LgChronicleComposerComponent);
   private readonly log = viewChild<ElementRef<HTMLElement>>('log');
 
   protected readonly tall = signal(false);
@@ -373,10 +424,6 @@ export class LgChronicleComponent {
         this.announcer.announce(typeof m.text === 'string' ? who + ': ' + m.text : who, { key: 'chronicle-' + (m.id ?? who) });
       });
     });
-  }
-
-  protected has(name: string): boolean {
-    return lgHasSlot(this.slots(), name);
   }
 
   protected author(m: LgChronicleMessage): string {

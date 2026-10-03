@@ -10,6 +10,7 @@ import {
 import { LgDensity, lgCx, lgUniqueId } from '../../core/grimoire-core';
 import { NgTemplateOutlet } from '@angular/common';
 import { LgIconComponent } from '../icon/icon.component';
+import { LgKeyComponent } from '../key/key.component';
 import { LgIconName } from '../../core/grimoire-icons';
 import { LG_STATES, LgBlockedState, LgShortfall, lgBlockedReason, lgIsBlocked } from '../../core/grimoire-states';
 import { LgBlockedController } from '../../core/grimoire-blocked';
@@ -27,7 +28,7 @@ export type LgButtonState = 'available' | LgBlockedState | 'pending';
  */
 @Component({
   selector: 'button[lgButton], a[lgButton]',
-  imports: [LgIconComponent, NgTemplateOutlet],
+  imports: [LgIconComponent, LgKeyComponent, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'hostClass()',
@@ -60,7 +61,7 @@ export type LgButtonState = 'available' | LgBlockedState | 'pending';
       <span class="lg-btn__label"><ng-container [ngTemplateOutlet]="content" /></span>
     }
     @if (hotkey()) {
-      <kbd class="lg-key">{{ hotkey() }}</kbd>
+      <kbd lgKey>{{ hotkey() }}</kbd>
     }
     @if (blocked()) {
       <span class="lg-sr lg-blocked__desc" [id]="blockedId" aria-hidden="true">{{ blockedTip.spoken() }}</span>

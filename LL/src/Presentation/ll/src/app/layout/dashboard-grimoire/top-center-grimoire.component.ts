@@ -26,12 +26,12 @@ import { QuestObjectiveGrimoireComponent } from './quest-objective-grimoire.comp
             [label]="dungeon.statusLabel()"
           />
         } @else {
-          <lg-objective [kicker]="dungeon.statusLabel()" [title]="dungeon.dungeonTitle()" [objective]="dungeon.progressText()" />
+          <lg-objective [kicker]="dungeon.statusLabel()" [heading]="dungeon.dungeonTitle()" [objective]="dungeon.progressText()" />
         }
       </a>
     } @else if (raid.activeRaid(); as run) {
       <a class="tc-run" [routerLink]="['/game/world/raid', run.id]">
-        <lg-objective [kicker]="raid.statusLabel()" [title]="raid.raidTitle()" [objective]="raid.progressText()" />
+        <lg-objective [kicker]="raid.statusLabel()" [heading]="raid.raidTitle()" [objective]="raid.progressText()" />
       </a>
     } @else {
       <app-quest-objective-grimoire />

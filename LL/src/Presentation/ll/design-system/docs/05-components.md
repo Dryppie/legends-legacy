@@ -32,6 +32,15 @@ Every component starts at Draft (Governance defines the statuses). They are grou
 | SearchField | search with suggestions | Actions & input | Draft |
 | Option | an option in a list that keeps focus in its field | Actions & input | Draft |
 | Tabs | the tabs | Actions & input | Draft |
+| Field | a labelled input, with its hint or error | Actions & input | Draft |
+| Input | a text input or textarea in Grimoire's well | Actions & input | Draft |
+| Checkbox | a choice to tick, with its words | Actions & input | Draft |
+| Switch | a setting, on or off at once | Actions & input | Draft |
+| Radio group | one choice among a few, all in view | Actions & input | Draft |
+| Segmented | two to four short choices, side by side | Actions & input | Draft |
+| Icon button | a common action shown by its icon alone | Actions & input | Draft |
+| Select | one choice from a list, in a field | Actions & input | Draft |
+| Menu | actions on the thing it opened from | Actions & input | Draft |
 | Heading | the titles | Type & ornament | Draft |
 | Icon | the game's icon set | Type & ornament | Draft |
 | SectionRule | the dividers | Type & ornament | Draft |
@@ -42,10 +51,16 @@ Every component starts at Draft (Governance defines the statuses). They are grou
 | Delta | the stat change | Data | Draft |
 | StatFigure | the headline number | Data | Draft |
 | Track | the milestone track | Data | Draft |
+| Region state | what a region shows in place of its content | Data | Draft |
+| Skeleton | the still blocks of the Loading state | Data | Draft |
+| Table | the data table | Data | Draft |
 | Panel | the content box | Containers | Draft |
 | Banner | the headline block | Containers | Draft |
 | PageHeader | the information screen heading | Containers | Draft |
 | Notice | the persistent notice | Containers | Draft |
+| Dialog | a modal sheet over the scrim, and the confirmation over it | Containers | Draft |
+| Toast | a brief outcome at the top centre of the stage | Containers | Draft |
+| Popover | a float that opens on a press, holding controls of its own | Containers | Draft |
 | List | the list and its rows, and the scene name list | Lists & labels | Draft |
 | Tag | the status label | Lists & labels | Draft |
 | Presence | the online status | Lists & labels | Draft |

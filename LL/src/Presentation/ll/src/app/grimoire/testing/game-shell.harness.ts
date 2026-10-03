@@ -1,6 +1,7 @@
 import { ComponentHarness, TestElement, TestKey } from '@angular/cdk/testing';
 
-/** The screen frame (lg-game-shell): the rail drawer on narrow screens, and where the floating Chronicle sits. */
+/** The screen frame (lg-game-shell): the rail drawer on narrow screens, and where the floating Chronicle sits. Its
+ *  regions are lg-shell-rail, -top, -folio, -hints and -chronicle. */
 export class LgGameShellHarness extends ComponentHarness {
   static hostSelector = 'lg-game-shell';
 
@@ -37,6 +38,15 @@ export class LgGameShellHarness extends ComponentHarness {
       if (await el.isFocused()) return el.text();
     }
     return null;
+  }
+
+  /** Tab from the open drawer's last control: focus reaches the end of the drawer's focus trap, which sends it back
+   *  to the drawer's first control. */
+  async tabPastRail(): Promise<void> {
+    const anchors = await this.locatorForAll('.cdk-focus-trap-anchor')();
+    const end = anchors[anchors.length - 1];
+    if (!end) throw Error('The rail drawer holds no focus trap: is it open?');
+    await end.focus();
   }
 
   /** A key pressed where focus is inside the shell. */

@@ -15,7 +15,7 @@ import { Router } from '@angular/router';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { QuestTrackerComponent } from '../dashboard/quest-tracker/quest-tracker.component';
 import { DialogFocusDirective } from '../../shared/directives/dialog-focus/dialog-focus.directive';
-import { LgButtonComponent, LgObjectiveComponent, LgSlotDirective } from '@grimoire';
+import { LgButtonComponent, LgObjectiveComponent, LgObjectivePanelComponent } from '@grimoire';
 
 /**
  * The pinned quest in the TopBar's centre (D-110): the old header tracker's data and behaviour as an Objective, its
@@ -24,7 +24,7 @@ import { LgButtonComponent, LgObjectiveComponent, LgSlotDirective } from '@grimo
  */
 @Component({
   selector: 'app-quest-objective-grimoire',
-  imports: [LgObjectiveComponent, LgButtonComponent, LgSlotDirective, DialogFocusDirective],
+  imports: [LgObjectiveComponent, LgObjectivePanelComponent, LgButtonComponent, DialogFocusDirective],
   changeDetection: ChangeDetectionStrategy.Default,
   styleUrls: ['../dashboard/quest-tracker/quest-tracker.component.scss', './quest-objective-grimoire.component.scss'],
   host: { style: 'display: contents' },
@@ -38,50 +38,52 @@ import { LgButtonComponent, LgObjectiveComponent, LgSlotDirective } from '@grimo
       >
         <lg-objective
           kicker="Quest"
-          [title]="q.title"
+          [heading]="q.title"
           [objective]="summaryText()"
           [current]="requiresChoice() ? undefined : objective()?.currentAmount"
           [required]="requiresChoice() ? undefined : objective()?.requiredAmount"
           [(open)]="open"
         >
-          <div lgSlot="panel" class="qo-panel">
-            <div class="qo-head">
-              <div class="qo-titles">
-                <p class="qo-kicker">Pinned quest</p>
-                <p class="qo-title">{{ q.title }}</p>
-                @if (q.chain; as chain) {
-                  <p class="qo-chain">{{ chain.title }} · Chain {{ chain.step }} of {{ chain.totalSteps }}</p>
-                }
+          <lg-objective-panel>
+            <div class="qo-panel">
+              <div class="qo-head">
+                <div class="qo-titles">
+                  <p class="qo-kicker">Pinned quest</p>
+                  <p class="qo-title">{{ q.title }}</p>
+                  @if (q.chain; as chain) {
+                    <p class="qo-chain">{{ chain.title }} · Chain {{ chain.step }} of {{ chain.totalSteps }}</p>
+                  }
+                </div>
+                <span class="qo-count">{{ completedObjectiveCount() }} / {{ q.objectives.length }} objectives</span>
               </div>
-              <span class="qo-count">{{ completedObjectiveCount() }} / {{ q.objectives.length }} objectives</span>
+              @if (q.chain; as chain) {
+                <p class="qo-note">{{ chain.description }}</p>
+              }
+              @if (requiresChoice()) {
+                <p class="qo-note">{{ q.choice?.selectionSummary }}</p>
+              } @else {
+                <ol class="qo-list">
+                  @for (o of q.objectives; track $index) {
+                    <li class="qo-item" [class.is-done]="o.isCompleted">
+                      <span class="qo-mark" aria-hidden="true">{{ o.isCompleted ? '✓' : $index + 1 }}</span>
+                      <span class="qo-text">{{ o.description }}@if (o.isCompleted) {<span class="lg-sr">, done</span>}</span>
+                      <span class="qo-amount">{{ o.currentAmount }} / {{ o.requiredAmount }}</span>
+                    </li>
+                  }
+                </ol>
+              }
+              @if (actionLabel(); as label) {
+                <div class="qo-actions">
+                  <button [lgButton]="readyToTurnIn() ? 'solid' : 'primary'" size="sm" (click)="open.set(false); act()">
+                    {{ label }}
+                  </button>
+                </div>
+              }
+              @if (error(); as message) {
+                <p class="qo-error" role="alert">{{ message }}</p>
+              }
             </div>
-            @if (q.chain; as chain) {
-              <p class="qo-note">{{ chain.description }}</p>
-            }
-            @if (requiresChoice()) {
-              <p class="qo-note">{{ q.choice?.selectionSummary }}</p>
-            } @else {
-              <ol class="qo-list">
-                @for (o of q.objectives; track $index) {
-                  <li class="qo-item" [class.is-done]="o.isCompleted">
-                    <span class="qo-mark" aria-hidden="true">{{ o.isCompleted ? '✓' : $index + 1 }}</span>
-                    <span class="qo-text">{{ o.description }}@if (o.isCompleted) {<span class="lg-sr">, done</span>}</span>
-                    <span class="qo-amount">{{ o.currentAmount }} / {{ o.requiredAmount }}</span>
-                  </li>
-                }
-              </ol>
-            }
-            @if (actionLabel(); as label) {
-              <div class="qo-actions">
-                <button [lgButton]="readyToTurnIn() ? 'solid' : 'primary'" size="sm" (click)="open.set(false); act()">
-                  {{ label }}
-                </button>
-              </div>
-            }
-            @if (error(); as message) {
-              <p class="qo-error" role="alert">{{ message }}</p>
-            }
-          </div>
+          </lg-objective-panel>
         </lg-objective>
       </span>
     }

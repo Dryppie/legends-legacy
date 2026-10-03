@@ -45,48 +45,53 @@
   </lg-page-header>
 
   @if (error()) {
-    <p class="ovw-state ovw-state--error" role="alert">
-      <span class="ovw-state__glyph" aria-hidden="true">✕</span>
-      {{ error() }}
-      <button lgButton="link" size="sm" (click)="refresh()">Try again</button>
-    </p>
+    <lg-region-state class="ovw-state" state="error" [heading]="error()">
+      <lg-region-state-actions>
+        <button lgButton="link" size="sm" (click)="refresh()">Try again</button>
+      </lg-region-state-actions>
+    </lg-region-state>
   }
   @if (!character()) {
     @if (loading()) {
-      <p class="ovw-state" aria-busy="true">Loading character overview…</p>
+      <lg-region-state
+        class="ovw-state"
+        state="loading"
+        heading="Loading character overview…"
+      >
+        <lg-skeleton count="2" />
+      </lg-region-state>
     } @else if (!error()) {
-      <p class="ovw-state">No character overview loaded.</p>
+      <lg-region-state
+        class="ovw-state"
+        state="empty"
+        heading="No character overview loaded."
+      />
     }
   }
 
   @if (character(); as c) {
     @if (journey(); as j) {
       <lg-journey-card
-        id="ovw-journey"
         [stages]="journeyStages()"
         [phase]="j.phaseLabel"
-        [title]="j.title"
+        [heading]="j.title"
         [summary]="j.summary"
         [objective]="j.objective"
         [nextUnlockLabel]="j.nextUnlockLabel"
         [nextUnlock]="j.nextUnlock"
       >
-        <button
-          lgButton="solid"
-          lgSlot="actions"
-          size="sm"
-          (click)="go(j.primaryAction.route)"
-        >
-          {{ j.primaryAction.label }}
-        </button>
-        <button
-          lgButton
-          lgSlot="actions"
-          size="sm"
-          (click)="go(j.optionalAction.route)"
-        >
-          Optional: {{ j.optionalAction.label }}
-        </button>
+        <lg-journey-card-actions>
+          <button
+            lgButton="solid"
+            size="sm"
+            (click)="go(j.primaryAction.route)"
+          >
+            {{ j.primaryAction.label }}
+          </button>
+          <button lgButton size="sm" (click)="go(j.optionalAction.route)">
+            Optional: {{ j.optionalAction.label }}
+          </button>
+        </lg-journey-card-actions>
       </lg-journey-card>
     }
 

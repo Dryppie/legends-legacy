@@ -1,5 +1,5 @@
 /* ---------- Presence ---------- */
-.lg-presence { display: inline-flex; align-items: center; gap: 0.375rem; font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); font-weight: 600; color: var(--lg-ink-muted); }
+:host { display: inline-flex; align-items: center; gap: 0.375rem; font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); font-weight: 600; color: var(--lg-ink-muted); }
 .lg-presence__dot { width: 0.5rem; height: 0.5rem; border-radius: var(--lg-radius-circle); border: var(--lg-border-hairline) solid var(--lg-ink-muted); }
-.lg-presence.is-online { color: var(--lg-arcana); }
-.lg-presence.is-online .lg-presence__dot { background: var(--lg-arcana-glow); border-color: var(--lg-arcana-glow); }
+:host(.is-online) { color: var(--lg-arcana); }
+:host(.is-online) .lg-presence__dot { background: var(--lg-arcana-glow); border-color: var(--lg-arcana-glow); }

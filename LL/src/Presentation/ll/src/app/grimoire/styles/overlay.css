@@ -1,0 +1,20 @@
+/* ---------- Layers on the CDK overlay (Foundations · Surfaces & Layering; D-145) ----------
+   Global, because the CDK draws its panes and backdrops outside every component. A dialog's or a confirmation's pane
+   carries lg-root, so the legacy element styles stop at it (D-100) and Grimoire's base type reaches its sheet; the sheet
+   itself (lg-dialog) is the dialog's look.
+
+   The scrim: flat slate-950 at 80%, never blurred, under each modal layer. It fades in over duration-base on
+   ease-enter, and the CDK takes it away when the layer closes. A confirmation brings its own, which dims the dialog it
+   overlays. */
+.cdk-overlay-backdrop.lg-dialog-scrim {
+  background: var(--lg-scrim);
+  transition: opacity var(--lg-duration-base) var(--lg-ease-enter);
+}
+/* The sheet decides its size; the pane only keeps it inside the window. */
+.cdk-overlay-pane.lg-dialog-pane { max-width: 100vw; max-height: 100vh; }
+
+/* Toasts sit on z-toast, above every page layer and dialog, the latest opened included. The CDK's panes all sit at the
+   container's z-index (1000) and stack in the order they opened, so the toasts' layer counts from there. */
+.cdk-overlay-container .lg-toast-host { z-index: calc(1000 + var(--lg-z-toast)); }
+/* The stack's pane never takes the pointer itself: only the toasts in it do. */
+.cdk-overlay-pane.lg-toast-pane { pointer-events: none; }

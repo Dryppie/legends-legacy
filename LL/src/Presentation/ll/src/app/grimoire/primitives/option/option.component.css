@@ -7,6 +7,9 @@
 }
 :host(.is-active) { background: var(--lg-gilt-soft); }
 :host([aria-disabled='true']) { color: var(--lg-ink-disabled); cursor: not-allowed; }
+/* The current choice (a Select's value) is Selected: the arcana-glow bar at its start, and weight 600 (D-146). */
+:host(.is-chosen) { font-weight: 600; box-shadow: inset var(--lg-border-emphasis) 0 0 var(--lg-arcana-glow); }
 @media (forced-colors: active) {
   :host(.is-active) { outline: 2px solid Highlight; outline-offset: -2px; }
+  :host(.is-chosen) { border-inline-start: 2px solid CanvasText; }
 }

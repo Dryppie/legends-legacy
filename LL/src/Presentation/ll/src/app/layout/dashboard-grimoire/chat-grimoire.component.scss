@@ -1,9 +1,4 @@
 // The chat's own parts inside the Chronicle (D-112). Tokens only.
-.cg-aside {
-  display: flex;
-  align-items: center;
-  gap: var(--lg-space-2);
-}
 .cg-composer {
   position: relative;
 }
@@ -29,14 +24,26 @@
   text-decoration: underline;
   text-underline-offset: 0.15em;
 }
+// Channel settings: a fieldset of Checkboxes in a Popover (D-146), titled in label capitals.
 .cg-menu {
+  display: grid;
+  gap: var(--lg-space-1);
   margin: 0;
-  border-width: var(--lg-border-hairline);
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.cg-menu__title {
+  padding: 0;
+  margin-bottom: var(--lg-space-1);
+  font-size: var(--lg-text-label);
+  line-height: var(--lg-leading-label);
+  font-weight: 600;
+  letter-spacing: var(--lg-tracking-caps);
+  text-transform: uppercase;
+  color: var(--lg-ink-muted);
 }
 .cg-clear {
   justify-self: start;
   margin-top: var(--lg-space-2);
-}
-.cg-player {
-  min-width: 10rem;
 }

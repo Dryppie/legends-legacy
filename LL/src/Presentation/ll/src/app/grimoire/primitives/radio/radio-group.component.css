@@ -1,0 +1,11 @@
+/* ---------- Radio group ----------
+   A fieldset with its legend set like a Field's label; the radios one under the other, or in a row. */
+:host { display: block; min-width: 0; }
+.lg-radio-group__set { margin: 0; padding: 0; border: 0; min-width: 0; }
+.lg-radio-group__legend {
+  margin-bottom: var(--lg-space-1); padding: 0;
+  font-family: var(--lg-font-ui); font-size: var(--lg-text-body-compact); line-height: var(--lg-leading-body-compact); font-weight: 600; color: var(--lg-ink);
+}
+.lg-radio-group__options { display: grid; gap: var(--lg-space-1); }
+.lg-radio-group__options.is-row { display: flex; flex-wrap: wrap; gap: var(--lg-space-1) var(--lg-space-5); }
+.lg-radio-group__set:disabled .lg-radio-group__legend { color: var(--lg-ink-disabled); }

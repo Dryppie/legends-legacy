@@ -4,60 +4,71 @@ import {
   ElementRef,
   afterNextRender,
   computed,
-  contentChildren,
+  inject,
   input,
-  viewChild,
 } from '@angular/core';
-import { LgSlotDirective, lgCx, lgHasSlot } from '../../core/grimoire-core';
+import { lgCx } from '../../core/grimoire-core';
 import { lgCheckOrnamentRule } from '../../core/grimoire-ornament';
 
 export type LgSectionRuleVariant = 'band' | 'ornament' | 'hairline';
 
+/** The rule's aside, at its end: a count or a quiet link ("3 of 5"). */
+@Component({
+  selector: 'lg-section-rule-aside',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'lg-rule__aside' },
+  template: '<ng-content />',
+  styles: `
+    :host { margin-left: auto; font-size: var(--lg-text-caption); line-height: var(--lg-leading-caption); color: var(--lg-ink-muted); }
+    :host-context(.lg-rule--end) { margin-left: 0; }
+    :host-context(.lg-rule--hairline) { order: 2; margin-left: 0; }
+  `,
+})
+export class LgSectionRuleAsideComponent {}
+
 /**
  * The dividers: a label band (Status, Biography), the lattice ornament (at most one per surface), or a hairline.
- * Extra content for a band goes in `lgSlot="aside"`.
+ * Extra content for a band goes in an `lg-section-rule-aside`.
  */
 @Component({
   selector: 'lg-section-rule',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: 'display: contents' },
+  host: {
+    '[class]': 'classes()',
+    role: 'separator',
+    '[attr.aria-label]': 'label() || null',
+  },
   template: `
     @if (variant() === 'ornament') {
-      <div #ornament class="lg-rule lg-rule--ornament" role="separator" [attr.aria-label]="label() || null">
+      <span class="lg-rule__lattice" aria-hidden="true"></span>
+      @if (label()) {
+        <span class="lg-rule__label">{{ label() }}</span>
         <span class="lg-rule__lattice" aria-hidden="true"></span>
-        @if (label()) {
-          <span class="lg-rule__label">{{ label() }}</span>
-          <span class="lg-rule__lattice" aria-hidden="true"></span>
-        }
-      </div>
+      }
     } @else {
-      <div [class]="classes()" role="separator" [attr.aria-label]="label() || null">
-        @if (label()) {
-          <span class="lg-rule__label">{{ label() }}</span>
-        }
-        @if (has('aside')) {
-          <span class="lg-rule__aside"><ng-content select="[lgSlot=aside]" /></span>
-        }
-      </div>
+      @if (label()) {
+        <span class="lg-rule__label">{{ label() }}</span>
+      }
+      <ng-content select="lg-section-rule-aside" />
     }
   `,
+  styleUrl: './section-rule.component.css',
 })
 export class LgSectionRuleComponent {
   readonly variant = input<LgSectionRuleVariant>('band');
   readonly label = input<string>();
   readonly align = input<'start' | 'end'>('start');
 
-  private readonly slots = contentChildren(LgSlotDirective);
-  private readonly ornament = viewChild<ElementRef<HTMLElement>>('ornament');
+  private readonly el = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   protected readonly classes = computed(() =>
-    lgCx('lg-rule', 'lg-rule--' + (this.variant() || 'band'), this.align() === 'end' && 'lg-rule--end'),
+    this.variant() === 'ornament'
+      ? 'lg-rule lg-rule--ornament'
+      : lgCx('lg-rule', 'lg-rule--' + (this.variant() || 'band'), this.align() === 'end' && 'lg-rule--end'),
   );
 
   constructor() {
-    afterNextRender(() => lgCheckOrnamentRule(this.ornament()?.nativeElement ?? null));
-  }
-
-  protected has(name: string): boolean {
-    return lgHasSlot(this.slots(), name);
+    afterNextRender(() => {
+      if (this.variant() === 'ornament') lgCheckOrnamentRule(this.el);
+    });
   }
 }
